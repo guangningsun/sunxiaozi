@@ -1,0 +1,7 @@
+node_modules/
+docs/.vuepress/dist/ # VuePress 1.x
+src/.vuepress/dist/ # VuePress 2.x
+docs/.vuepress/.temp/
+docs/.vuepress/.cache/
+*.log
+.DS_Store
