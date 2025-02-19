@@ -4,11 +4,11 @@ import { enNavbar, zhNavbar } from "./navbar/index.js";
 import { enSidebar, zhSidebar } from "./sidebar/index.js";
 
 export default hopeTheme({
-  hostname: "https://mister-hope.github.io",
+  hostname: "https:/sunxiaozi.cn",
 
   author: {
     name: "SunXiaozi",
-    url: "https://mister-hope.com",
+    url: "https://sunxiaozi.cn",
   },
 
   logo: "https://theme-hope-assets.vuejs.press/logo.svg",
@@ -71,7 +71,7 @@ export default hopeTheme({
       displayFooter: true,
 
       blog: {
-        description: "一个前端开发者",
+        description: "主流业余艺术家",
         intro: "/zh/intro.html",
       },
 
