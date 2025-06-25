@@ -5,13 +5,15 @@ import { enSidebar, zhSidebar } from "./sidebar/index.js";
 
 export default hopeTheme({
   hostname: "https:/sunxiaozi.cn",
+  darkmode: "enable", //配置深色模式 switch toggle auto disable
 
   author: {
     name: "SunXiaozi",
     url: "https://sunxiaozi.cn",
   },
 
-  logo: "https://theme-hope-assets.vuejs.press/logo.svg",
+  //logo: "https://theme-hope-assets.vuejs.press/logo.svg",
+  logo: "/.vuepress/public/ss.jpg",
 
   repo: "vuepress-theme-hope/vuepress-theme-hope",
 
