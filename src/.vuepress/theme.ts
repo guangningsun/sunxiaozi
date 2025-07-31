@@ -1,20 +1,15 @@
 import { hopeTheme } from "vuepress-theme-hope";
 
-import { enNavbar, zhNavbar } from "./navbar/index.js";
-import { enSidebar, zhSidebar } from "./sidebar/index.js";
+import { zhNavbar } from "./navbar/index.js";
+import { zhSidebar } from "./sidebar/index.js";
 
 export default hopeTheme({
   hostname: "https:/sunxiaozi.cn",
-  darkmode: "enable", //配置深色模式 switch toggle auto disable
-
+  darkmode: "enable",
   author: {
     name: "SunXiaozi",
     url: "https://sunxiaozi.cn",
   },
-
-  //logo: "https://theme-hope-assets.vuejs.press/logo.svg",
-  logo: "/.vuepress/public/ss.jpg",
-
   repo: "vuepress-theme-hope/vuepress-theme-hope",
 
   docsDir: "src",
@@ -39,30 +34,6 @@ export default hopeTheme({
   locales: {
     "/": {
       // navbar
-      navbar: enNavbar,
-
-      // sidebar
-      sidebar: enSidebar,
-
-      footer: "Default footer",
-
-      displayFooter: true,
-
-      blog: {
-        description: "A FrontEnd programmer",
-        intro: "/intro.html",
-      },
-
-      metaLocales: {
-        editLink: "Edit this page on GitHub",
-      },
-    },
-
-    /**
-     * Chinese locale config
-     */
-    "/zh/": {
-      // navbar
       navbar: zhNavbar,
 
       // sidebar
@@ -74,7 +45,7 @@ export default hopeTheme({
 
       blog: {
         description: "主流业余艺术家",
-        intro: "/zh/intro.html",
+        intro: "/intro.html",
       },
 
       // page meta
@@ -87,10 +58,6 @@ export default hopeTheme({
   encrypt: {
     config: {
       "/demo/encrypt.html": {
-        hint: "Password: 1234",
-        password: "1234",
-      },
-      "/zh/demo/encrypt.html": {
         hint: "Password: 1234",
         password: "1234",
       },

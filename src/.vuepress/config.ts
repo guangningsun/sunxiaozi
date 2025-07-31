@@ -6,12 +6,12 @@ export default defineUserConfig({
   base: "/",
 
   locales: {
+    // "/": {
+    //   lang: "en-US",
+    //   title: "SunXiaozi",
+    //   description: "SunXiaozi",
+    // },
     "/": {
-      lang: "en-US",
-      title: "SunXiaozi",
-      description: "SunXiaozi",
-    },
-    "/zh/": {
       lang: "zh-CN",
       title: "孙小子",
       description: "小楼一夜听春雨",
