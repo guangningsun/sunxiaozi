@@ -12,7 +12,7 @@ projects:
   - icon: folder-open
     name: 工具
     desc: 实用工具集合
-    link: /file_diff_tool.html
+    link: /file-diff-tool.html
 
 footer: 归去，也无风雨也无晴
 ---

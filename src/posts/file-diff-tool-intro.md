@@ -22,7 +22,7 @@ category:
 
 ## 使用方法
 
-1. 点击[这里](/file_diff_tool.html)访问工具
+1. 点击[这里](/file-diff-tool.html)访问工具
 2. 选择要对比的两个文件
 3. 查看文件差异
 

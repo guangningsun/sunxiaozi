@@ -9,7 +9,7 @@
 </ul>
 <h2 id="使用方法" tabindex="-1"><a class="header-anchor" href="#使用方法"><span>使用方法</span></a></h2>
 <ol>
-<li>点击<RouteLink to="/file_diff_tool.html">这里</RouteLink>访问工具</li>
+<li>点击<RouteLink to="/file-diff-tool.html">这里</RouteLink>访问工具</li>
 <li>选择要对比的两个文件</li>
 <li>查看文件差异</li>
 </ol>

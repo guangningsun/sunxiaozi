@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字符到二进制转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .converter-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .converter-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+            margin-right: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .binary-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+
+        .text-output {
+            background: #fff;
+            color: #333;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .format-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .format-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .format-option input[type="radio"] {
+            margin: 0;
+        }
+
+        .stats {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .stats strong {
+            color: #0d47a1;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-group {
+                justify-content: center;
+            }
+            
+            .format-options {
+                justify-content: center;
+            }
+        }
+
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>字符 ⇄ 二进制转换器</h1>
+        <p class="subtitle">轻松转换文本与ASCII二进制，支持多种格式</p>
+
+        <!-- 文本转二进制 -->
+        <div class="converter-section">
+            <h2 class="section-title">📝 文本转二进制</h2>
+            <div class="input-group">
+                <label for="textInput">输入文本:</label>
+                <textarea id="textInput" placeholder="在这里输入您要转换的文本...">hello world</textarea>
+            </div>
+            
+            <div class="format-options">
+                <div class="format-option">
+                    <input type="radio" id="format8" name="format" value="8" checked>
+                    <label for="format8">8位二进制</label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="formatSpace" name="format" value="space">
+                    <label for="formatSpace">空格分隔</label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="formatHex" name="format" value="hex">
+                    <label for="formatHex">十六进制</label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="binaryOutput">二进制结果:</label>
+                <textarea id="binaryOutput" class="binary-output" readonly>01101000 01100101 01101100 01101100 01101111 00100000 01110111 01101111 01110010 01101100 01100100</textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="convertTextToBinary()">🔄 转换</button>
+                <button class="btn btn-success" onclick="copyToClipboard('binaryOutput')">📋 复制二进制</button>
+                <button class="btn btn-secondary" onclick="clearText()">🗑️ 清空</button>
+            </div>
+
+            <div class="stats" id="textStats">
+                <strong>统计:</strong> 字符数: 11 | 字节数: 11 | 二进制位数: 88
+            </div>
+        </div>
+
+        <!-- 二进制转文本 -->
+        <div class="converter-section">
+            <h2 class="section-title">🔢 二进制转文本</h2>
+            <div class="input-group">
+                <label for="binaryInput">输入二进制:</label>
+                <textarea id="binaryInput" class="binary-output" placeholder="输入二进制代码... (支持空格、无空格、十六进制)">01101000 01100101 01101100 01101100 01101111 00100000 01110111 01101111 01110010 01101100 01100100</textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="textOutput">文本结果:</label>
+                <textarea id="textOutput" class="text-output" readonly>hello world</textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="convertBinaryToText()">🔄 转换</button>
+                <button class="btn btn-success" onclick="copyToClipboard('textOutput')">📋 复制文本</button>
+                <button class="btn btn-secondary" onclick="clearBinary()">🗑️ 清空</button>
+            </div>
+
+            <div class="stats" id="binaryStats">
+                <strong>统计:</strong> 二进制长度: 87 | 解析字符数: 11
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function textToBinary(text, format = '8') {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const binary = text.charCodeAt(i).toString(2).padStart(8, '0');
+                
+                switch(format) {
+                    case 'space':
+                        result += (i > 0 ? ' ' : '') + binary;
+                        break;
+                    case 'hex':
+                        result += (i > 0 ? ' ' : '') + text.charCodeAt(i).toString(16).toUpperCase().padStart(2, '0');
+                        break;
+                    default:
+                        result += (i > 0 ? ' ' : '') + binary;
+                }
+            }
+            return result;
+        }
+
+        function binaryToText(binary) {
+            // 清理输入，移除多余空格
+            binary = binary.replace(/\s+/g, ' ').trim();
+            
+            // 检测格式
+            if (binary.includes(' ')) {
+                const parts = binary.split(' ');
+                
+                // 检查是否为十六进制
+                if (parts[0].length <= 2 && /^[0-9A-Fa-f]+$/.test(parts[0])) {
+                    // 十六进制格式
+                    return parts.map(hex => String.fromCharCode(parseInt(hex, 16))).join('');
+                } else {
+                    // 二进制格式，有空格分隔
+                    return parts.map(bin => String.fromCharCode(parseInt(bin, 2))).join('');
+                }
+            } else {
+                // 无空格的二进制，按8位分组
+                let result = '';
+                for (let i = 0; i < binary.length; i += 8) {
+                    const byte = binary.substr(i, 8);
+                    if (byte.length === 8) {
+                        result += String.fromCharCode(parseInt(byte, 2));
+                    }
+                }
+                return result;
+            }
+        }
+
+        function convertTextToBinary() {
+            const text = document.getElementById('textInput').value;
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const binary = textToBinary(text, format);
+            
+            document.getElementById('binaryOutput').value = binary;
+            updateTextStats(text, binary);
+        }
+
+        function convertBinaryToText() {
+            const binary = document.getElementById('binaryInput').value;
+            try {
+                const text = binaryToText(binary);
+                document.getElementById('textOutput').value = text;
+                updateBinaryStats(binary, text);
+            } catch (error) {
+                alert('二进制格式不正确，请检查输入！');
+            }
+        }
+
+        function updateTextStats(text, binary) {
+            const charCount = text.length;
+            const byteCount = new TextEncoder().encode(text).length;
+            const binaryBits = text.length * 8;
+            
+            document.getElementById('textStats').innerHTML = 
+                `<strong>统计:</strong> 字符数: ${charCount} | 字节数: ${byteCount} | 二进制位数: ${binaryBits}`;
+        }
+
+        function updateBinaryStats(binary, text) {
+            const binaryLength = binary.replace(/\s/g, '').length;
+            const charCount = text.length;
+            
+            document.getElementById('binaryStats').innerHTML = 
+                `<strong>统计:</strong> 二进制长度: ${binaryLength} | 解析字符数: ${charCount}`;
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            element.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            showCopySuccess();
+        }
+
+        function showCopySuccess() {
+            const notification = document.createElement('div');
+            notification.className = 'copy-success';
+            notification.textContent = '✅ 已复制到剪贴板';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        function clearText() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('binaryOutput').value = '';
+            document.getElementById('textStats').innerHTML = '<strong>统计:</strong> 字符数: 0 | 字节数: 0 | 二进制位数: 0';
+        }
+
+        function clearBinary() {
+            document.getElementById('binaryInput').value = '';
+            document.getElementById('textOutput').value = '';
+            document.getElementById('binaryStats').innerHTML = '<strong>统计:</strong> 二进制长度: 0 | 解析字符数: 0';
+        }
+
+        // 实时转换功能
+        document.getElementById('textInput').addEventListener('input', convertTextToBinary);
+        document.getElementById('binaryInput').addEventListener('input', convertBinaryToText);
+        
+        // 格式选项变化时重新转换
+        document.querySelectorAll('input[name="format"]').forEach(radio => {
+            radio.addEventListener('change', convertTextToBinary);
+        });
+
+        // 初始化显示统计信息
+        convertTextToBinary();
+        convertBinaryToText();
+    </script>
+</body>
+</html>
