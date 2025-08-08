@@ -1,0 +1,46 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="400" height="400" fill="#1a1a1a"/>
+  
+  <!-- Outer gradient circle -->
+  <defs>
+    <linearGradient id="outerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="innerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ea580c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer arc -->
+  <path d="M 200 50 A 150 150 0 1 1 90 290" 
+        fill="none" 
+        stroke="url(#outerGradient)" 
+        stroke-width="12" 
+        stroke-linecap="round"/>
+  
+  <!-- Inner arc -->
+  <path d="M 200 90 A 110 110 0 1 1 120 280" 
+        fill="none" 
+        stroke="url(#innerGradient)" 
+        stroke-width="8" 
+        stroke-linecap="round"/>
+  
+  <!-- Text -->
+  <text x="200" y="220" 
+        text-anchor="middle" 
+        font-family="Arial, sans-serif" 
+        font-size="36" 
+        font-weight="bold" 
+        fill="#ffffff">Techno</text>
+  
+  <text x="200" y="260" 
+        text-anchor="middle" 
+        font-family="Arial, sans-serif" 
+        font-size="24" 
+        fill="#e5e7eb">生活漫游</text>
+</svg>

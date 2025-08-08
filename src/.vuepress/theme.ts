@@ -6,6 +6,11 @@ import { zhSidebar } from "./sidebar/index.js";
 export default hopeTheme({
   hostname: "https:/sunxiaozi.cn",
   darkmode: "enable",
+  
+  // 设置网站logo
+  logo: "/logo.jpg",
+  // 可选：设置深色模式下的logo
+  logoDark: "/dark_logo.png",
   author: {
     name: "SunXiaozi",
     url: "https://sunxiaozi.cn",
@@ -36,7 +41,7 @@ export default hopeTheme({
 
       blog: {
         description: "主流业余艺术家",
-        intro: "/intro.html",
+        // intro: "/intro.html",
       },
 
       // page meta
