@@ -10,24 +10,15 @@ export default hopeTheme({
     name: "SunXiaozi",
     url: "https://sunxiaozi.cn",
   },
-  repo: "vuepress-theme-hope/vuepress-theme-hope",
-
   docsDir: "src",
 
   blog: {
     medias: {
-      Email: "ssunxiaozi@gmail.com",
+      Gmail: "ssunxiaozi@gmail.com",
       Gitee: "https://example.com",
-      GitHub: "https://example.com",
-      Gmail: "mailto:info@example.com",
-      Reddit: "https://example.com",
+      GitHub: "https://guangningsun.com",
       Rss: "https://example.com",
-      Wechat: "https://example.com",
-      Weibo: "https://example.com",
-      VuePressThemeHope: {
-        icon: "https://theme-hope-assets.vuejs.press/logo.svg",
-        link: "https://theme-hope.vuejs.press",
-      },
+      WeChat: "https://example.com",
     },
   },
 
@@ -49,9 +40,9 @@ export default hopeTheme({
       },
 
       // page meta
-      metaLocales: {
-        editLink: "在 GitHub 上编辑此页",
-      },
+      // metaLocales: {
+      //   editLink: "在 GitHub 上编辑此页",
+      // },
     },
   },
 

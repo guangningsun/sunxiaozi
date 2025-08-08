@@ -1,4 +1,42 @@
 // place your custom styles here
-.vp-hero-info-wrapper {
+
+// 彻底隐藏BlogHome布局中的hero区域
+.theme-hope-content.blog-home .blog-hero,
+.theme-hope-content.blog-home .vp-blog-hero,
+.blog-home .blog-hero,
+.blog-home .vp-blog-hero,
+.vp-blog-hero,
+.blog-hero {
+  display: none !important;
+}
+
+// 隐藏所有可能的hero图片元素
+.blog-hero .vp-blog-hero-image,
+.blog-hero .hero-image,
+.vp-blog-hero .vp-blog-hero-image,
+.vp-blog-hero .hero-image,
+.blog-home .hero-image,
+.blog-home .vp-blog-hero-image,
+.vp-hero-info img,
+.hero-info img,
+.blog-home img[src*="hero"],
+.blog-home img[alt*="hero"],
+.vp-blog-hero-image,
+.hero-image,
+[class*="hero"] img {
+  display: none !important;
+}
+
+// 隐藏hero文本和标题
+.blog-hero .hero-info,
+.vp-blog-hero .hero-info,
+.blog-hero .hero-title,
+.vp-blog-hero .hero-title {
+  display: none !important;
+}
+
+// 隐藏任何包含hero的元素
+[class*="hero"],
+[id*="hero"] {
   display: none !important;
 }

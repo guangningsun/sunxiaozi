@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加解密工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2b2b2b;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .tool-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: none;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 1rem;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 80px;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            background: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            min-width: auto;
+            margin-left: 8px;
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+        }
+
+        .result-group {
+            position: relative;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .tool-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .algorithm-info {
+            background: #f7fafc;
+            border-left: 3px solid #667eea;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .algorithm-info h3 {
+            color: #2d3748;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .algorithm-info p {
+            color: #4a5568;
+            font-size: 0.85rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 加解密工具</h1>
+        <p class="subtitle">支持多种加密算法的文本加解密工具</p>
+        
+        <div class="tool-container">
+            <!-- 加密部分 -->
+            <div class="section">
+                <h2 class="section-title">🔒 加密</h2>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="plaintext">明文:</label>
+                        <textarea id="plaintext" placeholder="请输入要加密的文本..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <div class="form-group">
+                            <label for="encryptKey">密钥:</label>
+                            <input type="text" id="encryptKey" placeholder="请输入密钥...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="encryptAlgorithm">加密算法:</label>
+                            <select id="encryptAlgorithm">
+                                <option value="AES">AES (高级加密标准)</option>
+                                <option value="TripleDES">TripleDES (三重DES)</option>
+                                <option value="RC4">RC4 (流密码)</option>
+                                <option value="Rabbit">Rabbit (流密码)</option>
+                                <option value="Base64">Base64 (编码)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-info" id="encryptInfo">
+                    <h3>AES (Advanced Encryption Standard)</h3>
+                    <p>高级加密标准，是目前最安全和广泛使用的对称加密算法之一。适合加密敏感数据。</p>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="encryptText()">🔒 加密</button>
+                    <button onclick="clearEncrypt()" class="clear-btn">🗑️ 清空</button>
+                </div>
+                
+                <div class="form-group result-group">
+                    <div class="result-header">
+                        <label>加密结果:</label>
+                        <button onclick="copyResult('encryptResult')" class="copy-btn">📋 复制</button>
+                    </div>
+                    <textarea id="encryptResult" readonly placeholder="加密结果将显示在这里..."></textarea>
+                </div>
+            </div>
+
+            <!-- 解密部分 -->
+            <div class="section">
+                <h2 class="section-title">🔓 解密</h2>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="ciphertext">密文:</label>
+                        <textarea id="ciphertext" placeholder="请输入要解密的密文..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <div class="form-group">
+                            <label for="decryptKey">密钥:</label>
+                            <input type="text" id="decryptKey" placeholder="请输入密钥...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="decryptAlgorithm">解密算法:</label>
+                            <select id="decryptAlgorithm">
+                                <option value="AES">AES (高级加密标准)</option>
+                                <option value="TripleDES">TripleDES (三重DES)</option>
+                                <option value="RC4">RC4 (流密码)</option>
+                                <option value="Rabbit">Rabbit (流密码)</option>
+                                <option value="Base64">Base64 (解码)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-info" id="decryptInfo">
+                    <h3>AES (Advanced Encryption Standard)</h3>
+                    <p>高级加密标准，是目前最安全和广泛使用的对称加密算法之一。适合加密敏感数据。</p>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="decryptText()">🔓 解密</button>
+                    <button onclick="clearDecrypt()" class="clear-btn">🗑️ 清空</button>
+                </div>
+                
+                <div class="form-group result-group">
+                    <div class="result-header">
+                        <label>解密结果:</label>
+                        <button onclick="copyResult('decryptResult')" class="copy-btn">📋 复制</button>
+                    </div>
+                    <textarea id="decryptResult" readonly placeholder="解密结果将显示在这里..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // 算法信息
+        const algorithmInfo = {
+            AES: {
+                name: "AES (Advanced Encryption Standard)",
+                description: "高级加密标准，是目前最安全和广泛使用的对称加密算法之一。适合加密敏感数据。"
+            },
+            TripleDES: {
+                name: "TripleDES (Triple Data Encryption Standard)",
+                description: "三重数据加密标准，对数据进行三次DES加密，提供更高的安全性。"
+            },
+            RC4: {
+                name: "RC4 (Rivest Cipher 4)",
+                description: "流密码算法，加密速度快，适合实时通信加密。"
+            },
+            Rabbit: {
+                name: "Rabbit (流密码)",
+                description: "高性能流密码算法，加密速度极快，适合大量数据加密。"
+            },
+            Base64: {
+                name: "Base64 (编码/解码)",
+                description: "Base64编码，用于数据传输和存储，不是加密算法，仅用于数据编码。"
+            }
+        };
+
+        // 更新算法信息
+        function updateAlgorithmInfo(selectId, infoId) {
+            const select = document.getElementById(selectId);
+            const info = document.getElementById(infoId);
+            const algorithm = select.value;
+            
+            if (algorithmInfo[algorithm]) {
+                info.innerHTML = `
+                    <h3>${algorithmInfo[algorithm].name}</h3>
+                    <p>${algorithmInfo[algorithm].description}</p>
+                `;
+            }
+        }
+
+        // 绑定选择框变化事件
+        document.getElementById('encryptAlgorithm').addEventListener('change', () => {
+            updateAlgorithmInfo('encryptAlgorithm', 'encryptInfo');
+        });
+
+        document.getElementById('decryptAlgorithm').addEventListener('change', () => {
+            updateAlgorithmInfo('decryptAlgorithm', 'decryptInfo');
+        });
+
+        // 显示提示信息
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 加密函数
+        function encryptText() {
+            const plaintext = document.getElementById('plaintext').value.trim();
+            const key = document.getElementById('encryptKey').value.trim();
+            const algorithm = document.getElementById('encryptAlgorithm').value;
+            const resultArea = document.getElementById('encryptResult');
+
+            if (!plaintext) {
+                showToast('请输入要加密的文本！', 'error');
+                return;
+            }
+
+            if (!key && algorithm !== 'Base64') {
+                showToast('请输入密钥！', 'error');
+                return;
+            }
+
+            try {
+                let encrypted;
+                
+                switch (algorithm) {
+                    case 'AES':
+                        encrypted = CryptoJS.AES.encrypt(plaintext, key).toString();
+                        break;
+                    case 'TripleDES':
+                        encrypted = CryptoJS.TripleDES.encrypt(plaintext, key).toString();
+                        break;
+                    case 'RC4':
+                        encrypted = CryptoJS.RC4.encrypt(plaintext, key).toString();
+                        break;
+                    case 'Rabbit':
+                        encrypted = CryptoJS.Rabbit.encrypt(plaintext, key).toString();
+                        break;
+                    case 'Base64':
+                        encrypted = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(plaintext));
+                        break;
+                    default:
+                        throw new Error('不支持的加密算法');
+                }
+                
+                resultArea.value = encrypted;
+                showToast('加密成功！');
+            } catch (error) {
+                showToast('加密失败：' + error.message, 'error');
+                resultArea.value = '';
+            }
+        }
+
+        // 解密函数
+        function decryptText() {
+            const ciphertext = document.getElementById('ciphertext').value.trim();
+            const key = document.getElementById('decryptKey').value.trim();
+            const algorithm = document.getElementById('decryptAlgorithm').value;
+            const resultArea = document.getElementById('decryptResult');
+
+            if (!ciphertext) {
+                showToast('请输入要解密的密文！', 'error');
+                return;
+            }
+
+            if (!key && algorithm !== 'Base64') {
+                showToast('请输入密钥！', 'error');
+                return;
+            }
+
+            try {
+                let decrypted;
+                
+                switch (algorithm) {
+                    case 'AES':
+                        const bytesAES = CryptoJS.AES.decrypt(ciphertext, key);
+                        decrypted = bytesAES.toString(CryptoJS.enc.Utf8);
+                        break;
+                    case 'TripleDES':
+                        const bytes3DES = CryptoJS.TripleDES.decrypt(ciphertext, key);
+                        decrypted = bytes3DES.toString(CryptoJS.enc.Utf8);
+                        break;
+                    case 'RC4':
+                        const bytesRC4 = CryptoJS.RC4.decrypt(ciphertext, key);
+                        decrypted = bytesRC4.toString(CryptoJS.enc.Utf8);
+                        break;
+                    case 'Rabbit':
+                        const bytesRabbit = CryptoJS.Rabbit.decrypt(ciphertext, key);
+                        decrypted = bytesRabbit.toString(CryptoJS.enc.Utf8);
+                        break;
+                    case 'Base64':
+                        decrypted = CryptoJS.enc.Base64.parse(ciphertext).toString(CryptoJS.enc.Utf8);
+                        break;
+                    default:
+                        throw new Error('不支持的解密算法');
+                }
+                
+                if (!decrypted) {
+                    throw new Error('解密失败，请检查密文和密钥是否正确');
+                }
+                
+                resultArea.value = decrypted;
+                showToast('解密成功！');
+            } catch (error) {
+                showToast('解密失败：请检查密文和密钥是否正确', 'error');
+                resultArea.value = '';
+            }
+        }
+
+        // 复制结果
+        function copyResult(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element.value.trim()) {
+                showToast('没有内容可复制！', 'error');
+                return;
+            }
+            
+            element.select();
+            element.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                showToast('复制成功！');
+            } catch (error) {
+                showToast('复制失败！', 'error');
+            }
+        }
+
+        // 清空加密区域
+        function clearEncrypt() {
+            document.getElementById('plaintext').value = '';
+            document.getElementById('encryptKey').value = '';
+            document.getElementById('encryptResult').value = '';
+            showToast('已清空加密区域');
+        }
+
+        // 清空解密区域
+        function clearDecrypt() {
+            document.getElementById('ciphertext').value = '';
+            document.getElementById('decryptKey').value = '';
+            document.getElementById('decryptResult').value = '';
+            showToast('已清空解密区域');
+        }
+
+        // 自动调整文本框高度
+        function autoResize(element) {
+            element.style.height = 'auto';
+            element.style.height = element.scrollHeight + 'px';
+        }
+
+        // 为所有textarea添加自动调整高度功能
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', () => autoResize(textarea));
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 设置初始算法信息
+            updateAlgorithmInfo('encryptAlgorithm', 'encryptInfo');
+            updateAlgorithmInfo('decryptAlgorithm', 'decryptInfo');
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (document.activeElement.closest('.section:first-child')) {
+                            encryptText();
+                        } else {
+                            decryptText();
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

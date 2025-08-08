@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件对比工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .upload-box {
+            flex: 1;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-box:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-box.dragover {
+            border-color: #764ba2;
+            background: #f0f8ff;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .upload-label:hover {
+            color: #764ba2;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .options {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        .left-panel {
+            width: 400px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .right-panel {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #dee2e6;
+            display: none;
+        }
+
+        .panel-header {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .upload-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-box:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-box.dragover {
+            border-color: #764ba2;
+            background: #f0f8ff;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            cursor: pointer;
+            font-size: 1em;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .upload-label:hover {
+            color: #764ba2;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .comparison-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .comparison-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .comparison-content {
+            display: flex;
+            gap: 1px;
+            height: calc(100% - 80px);
+            flex: 1;
+        }
+
+        .file-panel {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+
+        .file-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-content {
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .line {
+            display: flex;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            border-bottom: 1px solid #eee;
+            min-height: 20px;
+        }
+
+        .line-number {
+            background: #f1f3f4;
+            color: #666;
+            padding: 2px 8px;
+            width: 60px;
+            text-align: right;
+            border-right: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .line-content {
+            flex: 1;
+            padding: 2px 8px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .line-added {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+        }
+
+        .line-removed {
+            background: #ffeaea;
+            border-left: 4px solid #dc3545;
+        }
+
+        .line-modified {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .line-added .line-number {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .line-removed .line-number {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .line-modified .line-number {
+            background: #ffeaa7;
+            color: #856404;
+        }
+
+        .no-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-style: italic;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+
+        .legend-added { background: #e8f5e8; }
+        .legend-removed { background: #ffeaea; }
+        .legend-modified { background: #fff3cd; }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-type-docx {
+            color: #2b579a;
+            font-weight: bold;
+        }
+
+        .file-type-text {
+            color: #666;
+        }
+
+        .parse-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .parse-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+            .upload-section {
+                flex-direction: column;
+            }
+            
+            .comparison-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .file-panel {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .options {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>文件对比工具</h1>
+            <p>上传两个文件进行内容对比，支持文本文件和Word文档(.docx)的差异分析</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox1">
+                <input type="file" id="file1" accept=".txt,.js,.html,.css,.json,.xml,.md,.csv,.log,.docx">
+                <label for="file1" class="upload-label">
+                    <div>📁 选择第一个文件</div>
+                    <div style="font-size: 0.9em; margin-top: 10px; color: #999;">支持文本文件和docx文档</div>
+                </label>
+                <div class="file-info" id="fileInfo1"></div>
+            </div>
+
+            <div class="upload-box" id="uploadBox2">
+                <input type="file" id="file2" accept=".txt,.js,.html,.css,.json,.xml,.md,.csv,.log,.docx">
+                <label for="file2" class="upload-label">
+                    <div>📁 选择第二个文件</div>
+                    <div style="font-size: 0.9em; margin-top: 10px; color: #999;">支持文本文件和docx文档</div>
+                </label>
+                <div class="file-info" id="fileInfo2"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="options">
+                <div class="option">
+                    <input type="checkbox" id="ignoreWhitespace" checked>
+                    <label for="ignoreWhitespace">忽略空格差异</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="ignoreCase">
+                    <label for="ignoreCase">忽略大小写</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="ignoreEmptyLines">
+                    <label for="ignoreEmptyLines">忽略空行</label>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="compareBtn" disabled>开始对比</button>
+            <button class="btn btn-secondary" id="clearBtn">清空文件</button>
+        </div>
+
+        <div class="comparison-section" id="comparisonSection">
+            <div class="comparison-header">
+                <h2>对比结果</h2>
+                <div class="comparison-stats">
+                    <div class="stat">
+                        <span>新增行:</span>
+                        <span class="stat-value" id="addedLines">0</span>
+                    </div>
+                    <div class="stat">
+                        <span>删除行:</span>
+                        <span class="stat-value" id="removedLines">0</span>
+                    </div>
+                    <div class="stat">
+                        <span>修改行:</span>
+                        <span class="stat-value" id="modifiedLines">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-content">
+                <div class="file-panel">
+                    <div class="file-header">
+                        <span id="fileName1">文件 1</span>
+                    </div>
+                    <div class="file-content" id="fileContent1">
+                        <div class="no-content">暂无内容</div>
+                    </div>
+                </div>
+
+                <div class="file-panel">
+                    <div class="file-header">
+                        <span id="fileName2">文件 2</span>
+                    </div>
+                    <div class="file-content" id="fileContent2">
+                        <div class="no-content">暂无内容</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-added"></div>
+                    <span>新增行</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-removed"></div>
+                    <span>删除行</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-modified"></div>
+                    <span>修改行</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script>
+        let file1Content = '';
+        let file2Content = '';
+        let file1Name = '';
+        let file2Name = '';
+
+        // 文件上传处理
+        function setupFileUpload() {
+            const file1Input = document.getElementById('file1');
+            const file2Input = document.getElementById('file2');
+            const uploadBox1 = document.getElementById('uploadBox1');
+            const uploadBox2 = document.getElementById('uploadBox2');
+
+            // 处理文件选择
+            file1Input.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 1));
+            file2Input.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 2));
+
+            // 处理拖拽
+            setupDragDrop(uploadBox1, 1);
+            setupDragDrop(uploadBox2, 2);
+        }
+
+        function setupDragDrop(box, fileIndex) {
+            box.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                box.classList.add('dragover');
+            });
+
+            box.addEventListener('dragleave', () => {
+                box.classList.remove('dragover');
+            });
+
+            box.addEventListener('drop', (e) => {
+                e.preventDefault();
+                box.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                handleFileSelect(file, fileIndex);
+            });
+        }
+
+        function handleFileSelect(file, fileIndex) {
+            if (!file) return;
+
+            const infoElement = document.getElementById(`fileInfo${fileIndex}`);
+            
+            // 显示加载状态
+            infoElement.innerHTML = `
+                <strong>${file.name}</strong><br>
+                <span style="color: #667eea;">正在读取文件...</span>
+            `;
+
+            // 检查文件类型
+            if (file.name.toLowerCase().endsWith('.docx')) {
+                // 处理docx文件
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                        const content = result.value;
+                        
+                        if (fileIndex === 1) {
+                            file1Content = content;
+                            file1Name = file.name;
+                        } else {
+                            file2Content = content;
+                            file2Name = file.name;
+                        }
+                        
+                        infoElement.innerHTML = `
+                            <strong>${file.name}</strong><br>
+                            大小: ${formatFileSize(file.size)}<br>
+                            类型: Word文档 (.docx)<br>
+                            <span style="color: #28a745;">✓ 文档已解析</span>
+                        `;
+                        
+                        updateCompareButton();
+                    } catch (error) {
+                        console.error('解析docx文件失败:', error);
+                        infoElement.innerHTML = `
+                            <strong>${file.name}</strong><br>
+                            <span style="color: #dc3545;">❌ 解析失败，请确保文件格式正确</span>
+                        `;
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                // 处理普通文本文件
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    
+                    if (fileIndex === 1) {
+                        file1Content = content;
+                        file1Name = file.name;
+                    } else {
+                        file2Content = content;
+                        file2Name = file.name;
+                    }
+                    
+                    infoElement.innerHTML = `
+                        <strong>${file.name}</strong><br>
+                        大小: ${formatFileSize(file.size)}<br>
+                        类型: ${file.type || '文本文件'}<br>
+                        <span style="color: #28a745;">✓ 文件已加载</span>
+                    `;
+                    
+                    updateCompareButton();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateCompareButton() {
+            const compareBtn = document.getElementById('compareBtn');
+            compareBtn.disabled = !file1Content || !file2Content;
+        }
+
+        // 文件对比逻辑
+        function compareFiles() {
+            const ignoreWhitespace = document.getElementById('ignoreWhitespace').checked;
+            const ignoreCase = document.getElementById('ignoreCase').checked;
+            const ignoreEmptyLines = document.getElementById('ignoreEmptyLines').checked;
+
+            // 预处理文件内容
+            const lines1 = preprocessLines(file1Content, ignoreWhitespace, ignoreCase, ignoreEmptyLines);
+            const lines2 = preprocessLines(file2Content, ignoreWhitespace, ignoreCase, ignoreEmptyLines);
+
+            // 执行差异对比
+            const diff = computeDiff(lines1, lines2);
+            
+            // 显示结果
+            displayComparison(diff);
+        }
+
+        function preprocessLines(content, ignoreWhitespace, ignoreCase, ignoreEmptyLines) {
+            let lines = content.split('\n');
+            
+            if (ignoreEmptyLines) {
+                lines = lines.filter(line => line.trim() !== '');
+            }
+            
+            return lines.map(line => {
+                let processedLine = line;
+                if (ignoreWhitespace) {
+                    processedLine = processedLine.replace(/\s+/g, ' ').trim();
+                }
+                if (ignoreCase) {
+                    processedLine = processedLine.toLowerCase();
+                }
+                return processedLine;
+            });
+        }
+
+        function computeDiff(lines1, lines2) {
+            const diff = [];
+            let i = 0, j = 0;
+            
+            while (i < lines1.length || j < lines2.length) {
+                if (i >= lines1.length) {
+                    // 文件1已结束，文件2还有内容
+                    diff.push({
+                        type: 'added',
+                        line1: '',
+                        line2: lines2[j],
+                        lineNum1: '',
+                        lineNum2: j + 1
+                    });
+                    j++;
+                } else if (j >= lines2.length) {
+                    // 文件2已结束，文件1还有内容
+                    diff.push({
+                        type: 'removed',
+                        line1: lines1[i],
+                        line2: '',
+                        lineNum1: i + 1,
+                        lineNum2: ''
+                    });
+                    i++;
+                } else if (lines1[i] === lines2[j]) {
+                    // 行内容相同
+                    diff.push({
+                        type: 'same',
+                        line1: lines1[i],
+                        line2: lines2[j],
+                        lineNum1: i + 1,
+                        lineNum2: j + 1
+                    });
+                    i++;
+                    j++;
+                } else {
+                    // 寻找匹配的行
+                    let found = false;
+                    
+                    // 向前查找匹配
+                    for (let k = j + 1; k < Math.min(j + 10, lines2.length); k++) {
+                        if (lines1[i] === lines2[k]) {
+                            // 在文件2中找到匹配，说明文件2中间有新增的行
+                            for (let l = j; l < k; l++) {
+                                diff.push({
+                                    type: 'added',
+                                    line1: '',
+                                    line2: lines2[l],
+                                    lineNum1: '',
+                                    lineNum2: l + 1
+                                });
+                            }
+                            diff.push({
+                                type: 'same',
+                                line1: lines1[i],
+                                line2: lines2[k],
+                                lineNum1: i + 1,
+                                lineNum2: k + 1
+                            });
+                            i++;
+                            j = k + 1;
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        for (let k = i + 1; k < Math.min(i + 10, lines1.length); k++) {
+                            if (lines1[k] === lines2[j]) {
+                                // 在文件1中找到匹配，说明文件1中间有删除的行
+                                for (let l = i; l < k; l++) {
+                                    diff.push({
+                                        type: 'removed',
+                                        line1: lines1[l],
+                                        line2: '',
+                                        lineNum1: l + 1,
+                                        lineNum2: ''
+                                    });
+                                }
+                                diff.push({
+                                    type: 'same',
+                                    line1: lines1[k],
+                                    line2: lines2[j],
+                                    lineNum1: k + 1,
+                                    lineNum2: j + 1
+                                });
+                                i = k + 1;
+                                j++;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!found) {
+                        // 没有找到匹配，标记为修改
+                        diff.push({
+                            type: 'modified',
+                            line1: lines1[i],
+                            line2: lines2[j],
+                            lineNum1: i + 1,
+                            lineNum2: j + 1
+                        });
+                        i++;
+                        j++;
+                    }
+                }
+            }
+            
+            return diff;
+        }
+
+        function displayComparison(diff) {
+            const comparisonSection = document.getElementById('comparisonSection');
+            const fileContent1 = document.getElementById('fileContent1');
+            const fileContent2 = document.getElementById('fileContent2');
+            const fileName1 = document.getElementById('fileName1');
+            const fileName2 = document.getElementById('fileName2');
+            
+            // 设置文件名
+            fileName1.textContent = file1Name;
+            fileName2.textContent = file2Name;
+            
+            // 清空内容
+            fileContent1.innerHTML = '';
+            fileContent2.innerHTML = '';
+            
+            let addedCount = 0;
+            let removedCount = 0;
+            let modifiedCount = 0;
+            
+            diff.forEach((item) => {
+                const line1 = createLineElement(item.line1, item.lineNum1, item.type);
+                const line2 = createLineElement(item.line2, item.lineNum2, item.type);
+                
+                fileContent1.appendChild(line1);
+                fileContent2.appendChild(line2);
+                
+                if (item.type === 'added') addedCount++;
+                else if (item.type === 'removed') removedCount++;
+                else if (item.type === 'modified') modifiedCount++;
+            });
+            
+            // 更新统计信息
+            document.getElementById('addedLines').textContent = addedCount;
+            document.getElementById('removedLines').textContent = removedCount;
+            document.getElementById('modifiedLines').textContent = modifiedCount;
+            
+            // 显示对比结果
+            comparisonSection.style.display = 'block';
+            comparisonSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function createLineElement(content, lineNum, type) {
+            const line = document.createElement('div');
+            line.className = 'line';
+            
+            if (type === 'added') line.classList.add('line-added');
+            else if (type === 'removed') line.classList.add('line-removed');
+            else if (type === 'modified') line.classList.add('line-modified');
+            
+            const lineNumber = document.createElement('div');
+            lineNumber.className = 'line-number';
+            lineNumber.textContent = lineNum;
+            
+            const lineContent = document.createElement('div');
+            lineContent.className = 'line-content';
+            lineContent.textContent = content;
+            
+            line.appendChild(lineNumber);
+            line.appendChild(lineContent);
+            
+            return line;
+        }
+
+        // 清空文件
+        function clearFiles() {
+            file1Content = '';
+            file2Content = '';
+            file1Name = '';
+            file2Name = '';
+            
+            document.getElementById('file1').value = '';
+            document.getElementById('file2').value = '';
+            document.getElementById('fileInfo1').innerHTML = '';
+            document.getElementById('fileInfo2').innerHTML = '';
+            document.getElementById('comparisonSection').style.display = 'none';
+            
+            updateCompareButton();
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            
+            document.getElementById('compareBtn').addEventListener('click', compareFiles);
+            document.getElementById('clearBtn').addEventListener('click', clearFiles);
+        });
+    </script>
+</body>
+</html>
