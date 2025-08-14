@@ -1,1 +1,1 @@
-export const sidebarData = {"/posts/":["file-diff-tool","encryption-tool"],"/techo/":[],"/easylife/":[]};
+export const sidebarData = {"/posts/":["file-diff-tool","encryption-tool","pdf-check"],"/techo/":[],"/easylife/":[]};
