@@ -20,6 +20,7 @@ export const routes = Object.fromEntries([
   ["/article/", { loader: () => import(/* webpackChunkName: "article_index.html" */"/Users/sunguangning/Documents/code/npmtest/sunxiaozi/src/.vuepress/.temp/pages/article/index.html.js"), meta: {"t":"文章","I":false} }],
   ["/star/", { loader: () => import(/* webpackChunkName: "star_index.html" */"/Users/sunguangning/Documents/code/npmtest/sunxiaozi/src/.vuepress/.temp/pages/star/index.html.js"), meta: {"t":"星标","I":false} }],
   ["/timeline/", { loader: () => import(/* webpackChunkName: "timeline_index.html" */"/Users/sunguangning/Documents/code/npmtest/sunxiaozi/src/.vuepress/.temp/pages/timeline/index.html.js"), meta: {"t":"时间轴","I":false} }],
+  ["/posts/text_statistics_tool.html", { loader: () => import(/* webpackChunkName: "posts_text_statistics_tool.html" */"/Users/sunguangning/Documents/code/npmtest/sunxiaozi/src/.vuepress/.temp/pages/posts/text_statistics_tool.html.js"), meta: {"c":["工具"],"g":["字符统计工具","写作工具"],"e":"\n<p>写公众号文章时，需要控制字数...<br>\n写论文时，要求严格的字符限制...<br>\n做翻译工作，需要精确统计字数...<br>\n写小说时，想知道今天写了多少字...<br>\n今天，这些问题都有了完美的解决方案！</p>\n<h2>功能特点</h2>\n<ul>\n<li>一键清空文本</li>\n<li>快速复制统计结果</li>\n<li>内置示例文本</li>\n<li>支持快捷键操作</li>\n</ul>\n<h2>使用说明</h2>\n<h5>检查只需3步：</h5>\n<ul>\n<li>打开工具网页</li>\n<li>在文本框中输入或粘贴内容</li>\n<li>统计结果实时显示</li>\n</ul>","r":{"minutes":0.92,"words":276},"t":"005.字符数量统计工具","i":"fas fa-code-compare","O":1,"y":"a"} }],
 ]);
 
 if (import.meta.webpackHot) {
