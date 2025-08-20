@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计时器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 400px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #cccccc;
+            margin-bottom: 60px;
+            line-height: 1.5;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 300;
+            font-family: 'Courier New', monospace;
+            margin: 40px 0;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .timer-display.running {
+            color: #4ade80;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 120px;
+        }
+
+        .btn-start {
+            background: #4ade80;
+            color: #1e1e1e;
+        }
+
+        .btn-start:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-pause {
+            background: #f59e0b;
+            color: #1e1e1e;
+        }
+
+        .btn-pause:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+        }
+
+        .milliseconds {
+            font-size: 2.5rem;
+            opacity: 0.7;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status.show {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .timer-display.running {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">计时器</h1>
+        <p class="description">监控事物的持续时间。基本上是一种具有简单计时器功能的计时器。</p>
+        
+        <div class="timer-display" id="display">
+            <span class="time">00:00.</span><span class="milliseconds">000</span>
+        </div>
+        
+        <div class="status" id="status">准备开始计时</div>
+        
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn" onclick="toggleTimer()">Start</button>
+            <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const status = document.getElementById('status');
+
+        function formatTime(milliseconds) {
+            const minutes = Math.floor(milliseconds / 60000);
+            const seconds = Math.floor((milliseconds % 60000) / 1000);
+            const ms = milliseconds % 1000;
+            
+            return {
+                time: `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.`,
+                milliseconds: ms.toString().padStart(3, '0')
+            };
+        }
+
+        function updateDisplay() {
+            const formatted = formatTime(elapsedTime);
+            display.querySelector('.time').textContent = formatted.time;
+            display.querySelector('.milliseconds').textContent = formatted.milliseconds;
+        }
+
+        function updateStatus(message) {
+            status.textContent = message;
+            status.classList.add('show');
+            setTimeout(() => status.classList.remove('show'), 2000);
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                // 暂停
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.textContent = 'Start';
+                startBtn.className = 'btn btn-start';
+                display.classList.remove('running');
+                updateStatus('计时已暂停');
+            } else {
+                // 开始
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                }, 10);
+                isRunning = true;
+                startBtn.textContent = 'Pause';
+                startBtn.className = 'btn btn-pause';
+                display.classList.add('running');
+                updateStatus('计时进行中...');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            startBtn.className = 'btn btn-start';
+            display.classList.remove('running');
+            updateDisplay();
+            updateStatus('计时器已重置');
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'KeyR') {
+                e.preventDefault();
+                resetTimer();
+            }
+        });
+
+        // 初始化显示
+        updateDisplay();
+        updateStatus('准备开始计时');
+    </script>
+</body>
+</html>

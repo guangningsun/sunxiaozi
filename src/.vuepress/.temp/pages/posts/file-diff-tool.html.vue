@@ -8,6 +8,7 @@
 <li>响应式设计</li>
 </ul>
 <h2 id="使用说明" tabindex="-1"><a class="header-anchor" href="#使用说明"><span>使用说明</span></a></h2>
+<h5 id="只需3步" tabindex="-1"><a class="header-anchor" href="#只需3步"><span>只需3步：</span></a></h5>
 <ol>
 <li>在左侧文本框中粘贴或输入第一个文件的内容</li>
 <li>在右侧文本框中粘贴或输入第二个文件的内容</li>

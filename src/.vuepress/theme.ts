@@ -135,6 +135,40 @@ export default hopeTheme({
 
   plugins: {
     blog: true,
+    
+    // 使用新的 slimsearch 插件替代已弃用的 searchPro
+    slimsearch: {
+      // 索引全部内容
+      indexContent: true,
+      // 搜索热键
+      hotKeys: [
+        { key: "k", ctrl: true },
+        { key: "/", ctrl: true },
+      ],
+      // 为分类和标签添加索引
+      customFields: [
+        {
+          getter: (page) => {
+            const category = page.frontmatter.category;
+            if (Array.isArray(category)) {
+              return category.filter((item): item is string => typeof item === 'string');
+            }
+            return typeof category === 'string' ? [category] : [];
+          },
+          formatter: "分类：$content",
+        },
+        {
+          getter: (page) => {
+            const tag = page.frontmatter.tag;
+            if (Array.isArray(tag)) {
+              return tag.filter((item): item is string => typeof item === 'string');
+            }
+            return typeof tag === 'string' ? [tag] : [];
+          },
+          formatter: "标签：$content",
+        },
+      ],
+    },
 
     // Install @waline/client before enabling it
     // Note: This is for testing ONLY!
@@ -151,7 +185,8 @@ export default hopeTheme({
     icon: {
       prefix: "fa6-solid:",
     },
-
+ 
+    
     // install @vuepress/plugin-pwa and uncomment these if you want a PWA
     // pwa: {
     //   favicon: "/favicon.ico",

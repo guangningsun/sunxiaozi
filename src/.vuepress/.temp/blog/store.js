@@ -1,1 +1,1 @@
-export const store = JSON.parse("[\"/posts/encryption-tool.html\",\"/posts/file-diff-tool.html\",\"/posts/interval_training_tool.html\",\"/posts/pdf-check.html\"]");
+export const store = JSON.parse("[\"/posts/encryption-tool.html\",\"/posts/file-diff-tool.html\",\"/posts/interval_training_tool.html\",\"/posts/pdf-check.html\",\"/posts/stopwatch_timer.html\",\"/posts/string_obfuscator.html\",\"/posts/text_statistics_tool.html\"]");

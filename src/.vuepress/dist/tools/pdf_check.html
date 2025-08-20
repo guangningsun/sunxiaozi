@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF签名检查器</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #2c3e50;
+            --border-color: #3498db;
+            --card-bg: #1e1e1e;
+            --card-border: #333;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --divider-color: #555;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: var(--text-color);
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            background-color: var(--card-bg);
+        }
+        
+        .drop-area.highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: var(--primary-dark);
+        }
+        
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 5px;
+            display: none;
+            border: 1px solid var(--card-border);
+        }
+        
+        .signature-results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .signature-item {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .valid {
+            color: var(--success-color);
+        }
+        
+        .invalid {
+            color: var(--error-color);
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .or-divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: var(--text-color);
+        }
+        
+        .or-divider::before, .or-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--divider-color);
+        }
+        
+        .or-divider::before {
+            margin-right: 10px;
+        }
+        
+        .or-divider::after {
+            margin-left: 10px;
+        }
+        
+        /* 修改了隐藏文件输入框的方式 */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .drop-area {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .drop-area {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF签名检查器</h1>
+    <p>验证PDF文件的签名。签名的PDF文件包含一个或多个签名，可用于确定文件的内容在签名后是否已被更改。</p>
+    
+    <div class="drop-area" id="dropArea">
+        <p><strong>拖放PDF文件到此处，或点击选择文件</strong></p>
+        <div class="or-divider">或</div>
+        <!-- 修改了文件输入框的隐藏方式 -->
+        <input type="file" id="fileInput" accept=".pdf" class="visually-hidden">
+        <button class="btn" id="browseBtn">浏览文件</button>
+    </div>
+    
+    <div class="file-info" id="fileInfo"></div>
+    
+    <div class="signature-results" id="signatureResults">
+        <h2>签名信息</h2>
+        <div id="signaturesList"></div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const signatureResults = document.getElementById('signatureResults');
+        const signaturesList = document.getElementById('signaturesList');
+
+        // 防止默认拖放行为
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 高亮显示拖放区域
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        // 处理文件放置
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                handleFiles(files);
+            } else {
+                alert('请拖放一个PDF文件');
+            }
+        }
+
+        // 浏览按钮点击事件
+        browseBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // 防止默认行为
+            fileInput.click(); // 触发文件输入框的点击事件
+            console.log('浏览按钮被点击');
+        });
+
+        // 文件选择事件
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files);
+            }
+        });
+
+        // 处理PDF文件
+        function handleFiles(files) {
+            const file = files[0];
+            
+            // 显示文件信息
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `
+                <strong>文件名:</strong> ${file.name}<br>
+                <strong>大小:</strong> ${formatFileSize(file.size)}<br>
+                <strong>类型:</strong> ${file.type}
+            `;
+            
+            // 检查签名
+            checkPDFSignatures(file);
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 检查PDF签名 (模拟实现)
+        function checkPDFSignatures(file) {
+            // 在实际应用中，这里应该使用PDF库如pdf.js来解析PDF并检查签名
+            // 这里只是一个模拟实现
+            
+            // 模拟异步操作
+            setTimeout(() => {
+                // 模拟随机结果 - 实际应用中应该解析PDF
+                const hasSignatures = Math.random() > 0.5;
+                
+                signatureResults.style.display = 'block';
+                signaturesList.innerHTML = '';
+                
+                if (hasSignatures) {
+                    // 模拟1-3个签名
+                    const signatureCount = Math.floor(Math.random() * 3) + 1;
+                    
+                    for (let i = 0; i < signatureCount; i++) {
+                        const isValid = Math.random() > 0.3;
+                        const signerName = `签署者 ${String.fromCharCode(65 + i)}`;
+                        const signingTime = new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 365).toLocaleString();
+                        const reason = isValid ? '文档认证' : '签名无效 - 文档可能已被修改';
+                        
+                        const signatureItem = document.createElement('div');
+                        signatureItem.className = 'signature-item';
+                        signatureItem.innerHTML = `
+                            <h3>签名 #${i + 1}</h3>
+                            <p><strong>签署者:</strong> ${signerName}</p>
+                            <p><strong>签署时间:</strong> ${signingTime}</p>
+                            <p><strong>状态:</strong> <span class="${isValid ? 'valid' : 'invalid'}">${isValid ? '有效' : '无效'}</span></p>
+                            <p><strong>原因:</strong> ${reason}</p>
+                        `;
+                        
+                        signaturesList.appendChild(signatureItem);
+                    }
+                } else {
+                    signaturesList.innerHTML = '<p>提供的文件中未找到签名。</p>';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
