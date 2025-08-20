@@ -15,7 +15,7 @@ import * as clientConfig13 from '/Users/sunguangning/Documents/code/npmtest/sunx
 import * as clientConfig14 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-active-header-links/lib/client/config.js'
 import * as clientConfig15 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-catalog/lib/client/config.js'
 import * as clientConfig16 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-nprogress/lib/client/config.js'
-import * as clientConfig17 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-slimsearch/lib/client/config.js'
+import * as clientConfig17 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-search/lib/client/config.js'
 import * as clientConfig18 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/node_modules/@vuepress/plugin-redirect/lib/client/config.js'
 import * as clientConfig19 from '/Users/sunguangning/Documents/code/npmtest/sunxiaozi/src/.vuepress/.temp/theme-hope/config.js'
 
