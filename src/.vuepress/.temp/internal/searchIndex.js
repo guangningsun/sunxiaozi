@@ -151,7 +151,7 @@ export const SEARCH_INDEX = [
     "extraFields": []
   },
   {
-    "title": "006.计时器工具",
+    "title": "007.计时器工具",
     "headers": [
       {
         "level": 2,
@@ -388,6 +388,49 @@ export const SEARCH_INDEX = [
     "title": "时间轴",
     "headers": [],
     "path": "/timeline/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "008.密码强度分析器",
+    "headers": [
+      {
+        "level": 2,
+        "title": "功能特点",
+        "slug": "功能特点",
+        "link": "#功能特点",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "颜值即正义",
+        "slug": "颜值即正义",
+        "link": "#颜值即正义",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用说明",
+        "slug": "使用说明",
+        "link": "#使用说明",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用工具",
+        "slug": "使用工具",
+        "link": "#使用工具",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "备用访问方式",
+        "slug": "备用访问方式",
+        "link": "#备用访问方式",
+        "children": []
+      }
+    ],
+    "path": "/posts/password_strength_analyzer.html",
     "pathLocale": "/",
     "extraFields": []
   }
