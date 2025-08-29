@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>声音分贝检测工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 0, 120, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 50px rgba(120, 0, 255, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff0080, #8000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 128, 0.3);
+            filter: drop-shadow(0 0 10px rgba(128, 0, 255, 0.5));
+        }
+
+        .decibel-display {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid rgba(255, 0, 128, 0.3);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(255, 0, 128, 0.2);
+        }
+
+        .decibel-value {
+            font-size: 4em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.8),
+                0 0 40px rgba(0, 255, 255, 0.4),
+                0 0 60px rgba(0, 255, 255, 0.2);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+        }
+
+        .decibel-unit {
+            font-size: 1.2em;
+            color: #888;
+            text-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
+        }
+
+        .volume-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00, #ff0040);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s ease;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.3),
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+            filter: drop-shadow(0 0 5px rgba(255, 0, 128, 0.5));
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        button {
+            background: linear-gradient(45deg, #8000ff, #ff0080);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(128, 0, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(128, 0, 255, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            filter: grayscale(1);
+        }
+
+        button:disabled::before {
+            display: none;
+        }
+
+        .status {
+            font-size: 1.1em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .status.active {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 255, 0.1),
+                0 0 20px rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        .status.error {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid rgba(255, 0, 64, 0.3);
+            box-shadow: 
+                inset 0 0 10px rgba(255, 0, 64, 0.1),
+                0 0 20px rgba(255, 0, 64, 0.2);
+            color: #ff0040;
+        }
+
+        .reference-levels {
+            text-align: left;
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(128, 0, 255, 0.1);
+        }
+
+        .reference-levels h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .level-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9em;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #ccc;
+        }
+
+        .level-value {
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+            }
+            50% { 
+                transform: scale(1.05); 
+                filter: drop-shadow(0 0 20px rgba(255, 0, 128, 0.8));
+            }
+            100% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+            }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 声音分贝检测</h1>
+        
+        <div class="decibel-display">
+            <div class="decibel-value" id="decibelValue">0</div>
+            <div class="decibel-unit">dB</div>
+        </div>
+
+        <div class="volume-bar">
+            <div class="volume-fill" id="volumeFill"></div>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" onclick="startMeasurement()">开始检测</button>
+            <button id="stopBtn" onclick="stopMeasurement()" disabled>停止检测</button>
+        </div>
+
+        <div class="status" id="status">点击"开始检测"按钮开始测量环境声音</div>
+
+        <div class="reference-levels">
+            <h3>参考分贝级别</h3>
+            <div class="level-item">
+                <span>安静图书馆</span>
+                <span class="level-value">30-40 dB</span>
+            </div>
+            <div class="level-item">
+                <span>正常对话</span>
+                <span class="level-value">50-65 dB</span>
+            </div>
+            <div class="level-item">
+                <span>繁忙街道</span>
+                <span class="level-value">70-85 dB</span>
+            </div>
+            <div class="level-item">
+                <span>摇滚音乐会</span>
+                <span class="level-value">100-115 dB</span>
+            </div>
+            <div class="level-item">
+                <span>喷气式飞机</span>
+                <span class="level-value">130+ dB</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let analyser;
+        let microphone;
+        let dataArray;
+        let isListening = false;
+        let animationFrame;
+
+        const decibelValue = document.getElementById('decibelValue');
+        const volumeFill = document.getElementById('volumeFill');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+
+        async function startMeasurement() {
+            try {
+                // 请求麦克风权限
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
+
+                // 创建音频上下文
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+
+                // 配置分析器
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.8;
+                microphone.connect(analyser);
+
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                isListening = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                status.textContent = '正在检测环境声音...';
+                status.className = 'status active';
+
+                // 开始分析音频
+                analyzeAudio();
+
+            } catch (error) {
+                console.error('无法访问麦克风:', error);
+                status.textContent = '无法访问麦克风，请检查权限设置';
+                status.className = 'status error';
+            }
+        }
+
+        function analyzeAudio() {
+            if (!isListening) return;
+
+            analyser.getByteFrequencyData(dataArray);
+            
+            // 计算平均音量
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / dataArray.length;
+            
+            // 转换为分贝值 (近似计算)
+            // 这里使用一个简化的公式来估算分贝值
+            let decibels = 20 * Math.log10(average / 255) + 100;
+            
+            // 限制分贝范围
+            decibels = Math.max(0, Math.min(120, decibels));
+            
+            // 更新显示
+            updateDisplay(decibels);
+            
+            // 继续分析
+            animationFrame = requestAnimationFrame(analyzeAudio);
+        }
+
+        function updateDisplay(decibels) {
+            // 更新分贝值显示
+            decibelValue.textContent = Math.round(decibels);
+            
+            // 根据分贝值改变颜色
+            if (decibels < 40) {
+                decibelValue.style.color = '#00ff88';
+                decibelValue.style.textShadow = '0 0 20px rgba(0, 255, 136, 0.5)';
+            } else if (decibels < 70) {
+                decibelValue.style.color = '#ffff00';
+                decibelValue.style.textShadow = '0 0 20px rgba(255, 255, 0, 0.5)';
+            } else if (decibels < 90) {
+                decibelValue.style.color = '#ff6600';
+                decibelValue.style.textShadow = '0 0 20px rgba(255, 102, 0, 0.5)';
+            } else {
+                decibelValue.style.color = '#ff0000';
+                decibelValue.style.textShadow = '0 0 20px rgba(255, 0, 0, 0.5)';
+            }
+
+            // 更新音量条
+            const percentage = Math.min(100, (decibels / 120) * 100);
+            volumeFill.style.width = percentage + '%';
+
+            // 高分贝时添加脉动效果
+            if (decibels > 80) {
+                decibelValue.classList.add('pulse');
+                setTimeout(() => decibelValue.classList.remove('pulse'), 500);
+            }
+        }
+
+        function stopMeasurement() {
+            isListening = false;
+            
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            if (audioContext) {
+                audioContext.close();
+            }
+            
+            if (microphone && microphone.mediaStream) {
+                microphone.mediaStream.getTracks().forEach(track => track.stop());
+            }
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            status.textContent = '检测已停止';
+            status.className = 'status';
+            
+            // 重置显示
+            decibelValue.textContent = '0';
+            decibelValue.style.color = '#00ff88';
+            volumeFill.style.width = '0%';
+        }
+
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (isListening) {
+                stopMeasurement();
+            }
+        });
+    </script>
+</body>
+</html>
