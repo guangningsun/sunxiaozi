@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网络测速工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .speed-display {
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .speed-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .speed-unit {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .status {
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .results {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .speed-value {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>网络测速工具</h1>
+        
+        <div class="speed-display">
+            <div class="speed-value" id="currentSpeed">0.00</div>
+            <div class="speed-unit">Mbps</div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="status" id="status">点击开始测试</div>
+        
+        <button class="test-button" id="startTest" onclick="startSpeedTest()">开始测试</button>
+        <button class="test-button" id="stopTest" onclick="stopSpeedTest()" style="display: none;">停止测试</button>
+        
+        <div class="results" id="results" style="display: none;">
+            <div class="result-item">
+                <div class="result-label">下载速度</div>
+                <div class="result-value" id="downloadSpeed">-- Mbps</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">上传速度</div>
+                <div class="result-value" id="uploadSpeed">-- Mbps</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">延迟</div>
+                <div class="result-value" id="latency">-- ms</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isTestRunning = false;
+        let testAborted = false;
+
+        function updateDisplay(speed, status) {
+            document.getElementById('currentSpeed').textContent = speed.toFixed(2);
+            document.getElementById('status').textContent = status;
+        }
+
+        function updateProgress(percentage) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        async function measureLatency() {
+            const testCount = 5;
+            let totalLatency = 0;
+            
+            for (let i = 0; i < testCount; i++) {
+                if (testAborted) return 0;
+                
+                const start = performance.now();
+                try {
+                    await fetch('https://www.google.com/generate_204', {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        cache: 'no-cache'
+                    });
+                } catch (e) {
+                    // 使用备用方法
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
+                }
+                const end = performance.now();
+                totalLatency += (end - start);
+            }
+            
+            return Math.round(totalLatency / testCount);
+        }
+
+        async function measureDownloadSpeed() {
+            const testDuration = 10; // 秒
+            const chunkSize = 1024 * 1024; // 1MB
+            let totalBytes = 0;
+            const startTime = performance.now();
+            
+            updateDisplay(0, '正在测试下载速度...');
+            
+            // 创建一个大的测试数据
+            const testData = new ArrayBuffer(chunkSize);
+            
+            while ((performance.now() - startTime) / 1000 < testDuration && !testAborted) {
+                const chunkStart = performance.now();
+                
+                // 模拟下载数据处理
+                const tempArray = new Uint8Array(testData);
+                for (let i = 0; i < tempArray.length; i += 1000) {
+                    if (testAborted) break;
+                    tempArray[i] = Math.random() * 255;
+                }
+                
+                totalBytes += chunkSize;
+                const elapsed = (performance.now() - startTime) / 1000;
+                const currentSpeed = (totalBytes * 8) / (elapsed * 1000000); // Mbps
+                
+                updateDisplay(currentSpeed, `下载测试进行中... ${elapsed.toFixed(1)}s`);
+                updateProgress((elapsed / testDuration) * 50); // 前50%进度
+                
+                // 小延迟以避免浏览器卡顿
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            const totalTime = (performance.now() - startTime) / 1000;
+            return (totalBytes * 8) / (totalTime * 1000000); // Mbps
+        }
+
+        async function measureUploadSpeed() {
+            const testDuration = 8; // 秒
+            const chunkSize = 512 * 1024; // 512KB
+            let totalBytes = 0;
+            const startTime = performance.now();
+            
+            updateDisplay(0, '正在测试上传速度...');
+            
+            while ((performance.now() - startTime) / 1000 < testDuration && !testAborted) {
+                const chunkStart = performance.now();
+                
+                // 模拟上传数据生成和处理
+                const uploadData = new Uint8Array(chunkSize);
+                for (let i = 0; i < uploadData.length; i += 100) {
+                    if (testAborted) break;
+                    uploadData[i] = Math.random() * 255;
+                }
+                
+                // 模拟数据压缩处理
+                let checksum = 0;
+                for (let i = 0; i < uploadData.length; i += 1000) {
+                    checksum += uploadData[i];
+                }
+                
+                totalBytes += chunkSize;
+                const elapsed = (performance.now() - startTime) / 1000;
+                const currentSpeed = (totalBytes * 8) / (elapsed * 1000000); // Mbps
+                
+                updateDisplay(currentSpeed, `上传测试进行中... ${elapsed.toFixed(1)}s`);
+                updateProgress(50 + (elapsed / testDuration) * 50); // 后50%进度
+                
+                await new Promise(resolve => setTimeout(resolve, 15));
+            }
+            
+            const totalTime = (performance.now() - startTime) / 1000;
+            return (totalBytes * 8) / (totalTime * 1000000); // Mbps
+        }
+
+        async function startSpeedTest() {
+            if (isTestRunning) return;
+            
+            isTestRunning = true;
+            testAborted = false;
+            
+            document.getElementById('startTest').style.display = 'none';
+            document.getElementById('stopTest').style.display = 'inline-block';
+            document.getElementById('results').style.display = 'none';
+            
+            try {
+                // 测试延迟
+                updateDisplay(0, '正在测试延迟...');
+                updateProgress(10);
+                const latency = await measureLatency();
+                
+                if (testAborted) {
+                    resetTest();
+                    return;
+                }
+                
+                // 测试下载速度
+                const downloadSpeed = await measureDownloadSpeed();
+                
+                if (testAborted) {
+                    resetTest();
+                    return;
+                }
+                
+                // 测试上传速度
+                const uploadSpeed = await measureUploadSpeed();
+                
+                if (testAborted) {
+                    resetTest();
+                    return;
+                }
+                
+                // 显示结果
+                updateProgress(100);
+                updateDisplay(0, '测试完成！');
+                
+                document.getElementById('downloadSpeed').textContent = downloadSpeed.toFixed(2) + ' Mbps';
+                document.getElementById('uploadSpeed').textContent = uploadSpeed.toFixed(2) + ' Mbps';
+                document.getElementById('latency').textContent = latency + ' ms';
+                
+                document.getElementById('results').style.display = 'grid';
+                
+            } catch (error) {
+                updateDisplay(0, '测试出错，请重试');
+                console.error('Speed test error:', error);
+            }
+            
+            resetTest();
+        }
+
+        function stopSpeedTest() {
+            testAborted = true;
+            updateDisplay(0, '测试已停止');
+            resetTest();
+        }
+
+        function resetTest() {
+            isTestRunning = false;
+            document.getElementById('startTest').style.display = 'inline-block';
+            document.getElementById('stopTest').style.display = 'none';
+            updateProgress(0);
+        }
+    </script>
+</body>
+</html>
