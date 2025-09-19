@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Image Splitter - KoalasToTheMax风格</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #vis {
+            background: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            cursor: crosshair;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        #imageUpload {
+            margin-bottom: 10px;
+        }
+
+        #imageUpload input[type="file"] {
+            background: #333;
+            color: white;
+            padding: 5px;
+            border: 1px solid #666;
+            border-radius: 5px;
+        }
+
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #progress {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            min-width: 150px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .circle {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .circle:hover {
+            stroke: rgba(255,255,255,0.3);
+            stroke-width: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <svg id="vis" width="512" height="512"></svg>
+        
+        <div id="controls">
+            <div id="imageUpload">
+                <input type="file" id="fileInput" accept="image/*">
+                <br>
+                <button onclick="loadDefaultImage()">加载默认图像</button>
+                <button onclick="resetVisualization()">重置</button>
+            </div>
+            <div>
+                层级: <span id="maxLayers">7</span>
+                <input type="range" id="layerSlider" min="3" max="8" value="7" onchange="updateLayers()">
+            </div>
+        </div>
+
+        <div id="progress">
+            <div>进度: <span id="progressText">0%</span></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="font-size: 12px; margin-top: 5px;">
+                已分裂: <span id="splitCount">0</span> / <span id="totalCount">0</span>
+            </div>
+        </div>
+
+        <div id="info">
+            <div>移动鼠标来分裂圆形，揭示隐藏的图像</div>
+            <div style="font-size: 12px; margin-top: 5px;">灵感来源于 KoalasToTheMax.com</div>
+        </div>
+    </div>
+
+    <script>
+        class InteractiveImageSplitter {
+            constructor() {
+                this.width = 512;
+                this.height = 512;
+                this.maxLayers = 7;
+                this.minSize = 8;
+                this.imageData = null;
+                this.circleTree = null;
+                this.layers = [];
+                this.allCircles = new Set();
+                this.splitCount = 0;
+                this.totalCircles = 0;
+                this.mousePosition = null;
+                
+                this.setupSVG();
+                this.setupEventListeners();
+                this.loadDefaultImage();
+            }
+
+            setupSVG() {
+                // 清除现有的SVG内容
+                this.svg = d3.select('#vis')
+                    .selectAll('*').remove();
+                
+                this.svg = d3.select('#vis')
+                    .attr('width', this.width)
+                    .attr('height', this.height)
+                    .attr('viewBox', `0 0 ${this.width} ${this.height}`);
+            }
+
+            setupEventListeners() {
+                // 鼠标移动事件 - 绑定到SVG元素
+                this.svg.on('mousemove', (event) => {
+                    const mousePos = d3.pointer(event);
+                    
+                    // 检查鼠标是否在SVG区域内
+                    if (mousePos[0] >= 0 && mousePos[0] <= this.width && 
+                        mousePos[1] >= 0 && mousePos[1] <= this.height) {
+                        
+                        if (this.mousePosition) {
+                            this.findAndSplit(this.mousePosition, mousePos);
+                        }
+                        this.mousePosition = mousePos;
+                    }
+                });
+
+                // 鼠标进入SVG时重置位置
+                this.svg.on('mouseenter', (event) => {
+                    this.mousePosition = d3.pointer(event);
+                });
+
+                // 鼠标离开SVG时清除位置
+                this.svg.on('mouseleave', () => {
+                    this.mousePosition = null;
+                });
+
+                // 文件上传
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.loadImageFromFile(file);
+                    }
+                });
+
+                // 触摸事件支持
+                this.svg.on('touchmove', (event) => {
+                    event.preventDefault();
+                    const touch = event.touches[0];
+                    const mousePos = d3.pointer(touch);
+                    if (this.mousePosition) {
+                        this.findAndSplit(this.mousePosition, mousePos);
+                    }
+                    this.mousePosition = mousePos;
+                });
+
+                this.svg.on('touchstart', (event) => {
+                    event.preventDefault();
+                    const touch = event.touches[0];
+                    this.mousePosition = d3.pointer(touch);
+                });
+            }
+
+            async loadDefaultImage() {
+                // 创建一个更复杂的测试图案来验证完整显示
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const size = Math.pow(2, this.maxLayers);
+                canvas.width = canvas.height = size;
+
+                // 创建四个象限不同颜色的测试图案
+                const halfSize = size / 2;
+                
+                // 左上角 - 红色渐变
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(0, 0, halfSize, halfSize);
+                
+                // 右上角 - 绿色渐变
+                ctx.fillStyle = '#00ff00';
+                ctx.fillRect(halfSize, 0, halfSize, halfSize);
+                
+                // 左下角 - 蓝色渐变
+                ctx.fillStyle = '#0000ff';
+                ctx.fillRect(0, halfSize, halfSize, halfSize);
+                
+                // 右下角 - 黄色渐变
+                ctx.fillStyle = '#ffff00';
+                ctx.fillRect(halfSize, halfSize, halfSize, halfSize);
+                
+                // 添加一些细节纹理
+                for (let x = 0; x < size; x += 4) {
+                    for (let y = 0; y < size; y += 4) {
+                        const brightness = Math.sin(x * 0.01) * Math.sin(y * 0.01) * 50;
+                        const currentPixel = ctx.getImageData(x, y, 1, 1).data;
+                        ctx.fillStyle = `rgb(${Math.max(0, Math.min(255, currentPixel[0] + brightness))}, ${Math.max(0, Math.min(255, currentPixel[1] + brightness))}, ${Math.max(0, Math.min(255, currentPixel[2] + brightness))})`;
+                        ctx.fillRect(x, y, 4, 4);
+                    }
+                }
+
+                const imageData = ctx.getImageData(0, 0, size, size);
+                console.log('Default image created, size:', size, 'x', size, 'data length:', imageData.data.length);
+                this.processImage(imageData);
+            }
+
+            loadImageFromFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.extractImageData(img);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            extractImageData(img) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const size = Math.pow(2, this.maxLayers);
+                
+                canvas.width = canvas.height = size;
+                
+                // 直接拉伸图像填满整个画布，显示完整图像
+                ctx.drawImage(img, 0, 0, size, size);
+                
+                const imageData = ctx.getImageData(0, 0, size, size);
+                this.processImage(imageData);
+            }
+
+            processImage(imageData) {
+                this.imageData = imageData;
+                this.buildCircleTree();
+                this.render();
+                this.updateProgress();
+            }
+
+            buildCircleTree() {
+                const dim = Math.pow(2, this.maxLayers);
+                const data = this.imageData.data;
+                
+                console.log('Building tree with dim:', dim, 'data length:', data.length);
+                
+                // 构建最精细层 (level 0)
+                const finestLayer = [];
+                for (let y = 0; y < dim; y++) {
+                    finestLayer[y] = [];
+                    for (let x = 0; x < dim; x++) {
+                        const i = (y * dim + x) * 4;
+                        const color = [data[i], data[i + 1], data[i + 2]];
+                        finestLayer[y][x] = new Circle(x, y, 1, color, null, 0);
+                    }
+                }
+
+                // 构建上层
+                let currentLayer = finestLayer;
+                let currentDim = dim;
+                const layers = [currentLayer];
+
+                for (let level = 1; level < this.maxLayers; level++) {
+                    const newDim = currentDim / 2;
+                    const newLayer = [];
+
+                    for (let y = 0; y < newDim; y++) {
+                        newLayer[y] = [];
+                        for (let x = 0; x < newDim; x++) {
+                            const c1 = currentLayer[y * 2][x * 2];
+                            const c2 = currentLayer[y * 2][x * 2 + 1];
+                            const c3 = currentLayer[y * 2 + 1][x * 2];
+                            const c4 = currentLayer[y * 2 + 1][x * 2 + 1];
+
+                            const avgColor = this.averageColors([c1.color, c2.color, c3.color, c4.color]);
+                            const parent = new Circle(x, y, Math.pow(2, level), avgColor, [c1, c2, c3, c4], level);
+                            
+                            c1.parent = c2.parent = c3.parent = c4.parent = parent;
+                            newLayer[y][x] = parent;
+                        }
+                    }
+
+                    layers.push(newLayer);
+                    currentLayer = newLayer;
+                    currentDim = newDim;
+                }
+
+                this.circleTree = layers[layers.length - 1][0][0]; // 根圆形
+                this.layers = layers;
+                this.allCircles = new Set();
+                this.addCirclesToSet(this.circleTree);
+                
+                console.log('Root circle position:', this.circleTree.x, this.circleTree.y, 'level:', this.circleTree.level);
+                console.log('Total circles in tree:', this.allCircles.size);
+                
+                this.calculateTotalCircles();
+            }
+
+            addCirclesToSet(circle) {
+                this.allCircles.add(circle);
+                if (circle.children) {
+                    circle.children.forEach(child => this.addCirclesToSet(child));
+                }
+            }
+
+            calculateTotalCircles() {
+                // 重新计算：总圆形数 = 四叉树中所有节点数
+                this.totalCircles = this.allCircles.size;
+                console.log('Total circles:', this.totalCircles);
+            }
+
+            averageColors(colors) {
+                const sum = colors.reduce((acc, color) => [
+                    acc[0] + color[0],
+                    acc[1] + color[1],
+                    acc[2] + color[2]
+                ], [0, 0, 0]);
+                
+                return [
+                    Math.round(sum[0] / colors.length),
+                    Math.round(sum[1] / colors.length),
+                    Math.round(sum[2] / colors.length)
+                ];
+            }
+
+            render() {
+                this.svg.selectAll('*').remove();
+                this.splitCount = 0;
+                
+                // 重置所有圆形的渲染状态
+                this.allCircles.forEach(circle => {
+                    circle.rendered = false;
+                    circle.element = null;
+                });
+                
+                if (this.circleTree) {
+                    this.addCircleToSVG(this.circleTree, true);
+                }
+                
+                this.updateProgress();
+            }
+
+            addCircleToSVG(circle, isRoot = false) {
+                const centerX = this.width / 2;
+                const centerY = this.height / 2;
+                
+                // 修正坐标计算：基于整个图像区域的坐标映射
+                const imageDim = Math.pow(2, this.maxLayers); // 图像总维度
+                const cellSize = this.width / imageDim; // 每个像素的大小
+                const circleSize = Math.pow(2, circle.level); // 当前圆形覆盖的像素数
+                const radius = (cellSize * circleSize) / 2; // 圆形半径
+                
+                // 计算圆形中心位置
+                const x = (circle.x * circleSize + circleSize / 2) * cellSize;
+                const y = (circle.y * circleSize + circleSize / 2) * cellSize;
+                
+                const circleElement = this.svg.append('circle')
+                    .attr('cx', isRoot ? centerX : x)
+                    .attr('cy', isRoot ? centerY : y)
+                    .attr('r', isRoot ? 4 : radius)
+                    .attr('fill', isRoot ? '#ffffff' : `rgb(${circle.color.join(',')})`)
+                    .attr('stroke', 'none')
+                    .attr('class', 'circle')
+                    .datum(circle);
+
+                if (isRoot) {
+                    circleElement
+                        .transition()
+                        .duration(1000)
+                        .attr('cx', x)
+                        .attr('cy', y)
+                        .attr('r', radius)
+                        .attr('fill', `rgb(${circle.color.join(',')})`);
+                } else {
+                    // 从父圆形位置开始动画
+                    if (circle.parent && circle.parent.element) {
+                        const parentElement = d3.select(circle.parent.element);
+                        circleElement
+                            .attr('cx', parentElement.attr('cx'))
+                            .attr('cy', parentElement.attr('cy'))
+                            .attr('r', parseFloat(parentElement.attr('r')))
+                            .attr('fill', parentElement.attr('fill'))
+                            .attr('fill-opacity', 0.7);
+                    }
+                    
+                    circleElement
+                        .transition()
+                        .duration(300)
+                        .attr('cx', x)
+                        .attr('cy', y)
+                        .attr('r', radius)
+                        .attr('fill', `rgb(${circle.color.join(',')})`)
+                        .attr('fill-opacity', 1);
+                }
+
+                circle.element = circleElement.node();
+                circle.rendered = true;
+            }
+
+            findAndSplit(startPos, endPos) {
+                const segments = this.breakLine(startPos, endPos, 4);
+                
+                for (let i = 0; i < segments.length - 1; i++) {
+                    const circle = this.findCircleAt(segments[i + 1]);
+                    if (circle && circle.canSplit() && this.checkIntersection(circle, segments[i], segments[i + 1])) {
+                        this.splitCircle(circle);
+                    }
+                }
+            }
+
+            breakLine(start, end, maxLength) {
+                const dx = end[0] - start[0];
+                const dy = end[1] - start[1];
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance <= maxLength) {
+                    return [start, end];
+                }
+                
+                const segments = Math.ceil(distance / maxLength);
+                const result = [start];
+                
+                for (let i = 1; i <= segments; i++) {
+                    const t = i / segments;
+                    result.push([
+                        start[0] + dx * t,
+                        start[1] + dy * t
+                    ]);
+                }
+                
+                return result;
+            }
+
+            findCircleAt(pos) {
+                // 查找鼠标位置处可以分裂的圆形
+                let foundCircle = null;
+                
+                // 遍历所有已渲染的圆形元素
+                this.svg.selectAll('circle').each(function(d) {
+                    if (!d || !d.canSplit()) return;
+                    
+                    const element = d3.select(this);
+                    const cx = parseFloat(element.attr('cx'));
+                    const cy = parseFloat(element.attr('cy'));
+                    const r = parseFloat(element.attr('r'));
+                    
+                    const dx = pos[0] - cx;
+                    const dy = pos[1] - cy;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance <= r) {
+                        // 找到最小的可分裂圆形（优先级更高）
+                        if (!foundCircle || r < parseFloat(d3.select(foundCircle.element).attr('r'))) {
+                            foundCircle = d;
+                        }
+                    }
+                });
+                
+                return foundCircle;
+            }
+
+            checkIntersection(circle, start, end) {
+                // 简化版本：直接检查端点是否在圆形内
+                const element = d3.select(circle.element);
+                const cx = parseFloat(element.attr('cx'));
+                const cy = parseFloat(element.attr('cy'));
+                const r = parseFloat(element.attr('r'));
+                
+                const dx = end[0] - cx;
+                const dy = end[1] - cy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                return distance <= r + 2; // 增加一些容错范围
+            }
+
+            splitCircle(circle) {
+                if (!circle.canSplit()) return;
+                
+                // 移除当前圆形
+                if (circle.element) {
+                    d3.select(circle.element).remove();
+                    circle.rendered = false;
+                }
+                
+                // 添加子圆形
+                if (circle.children) {
+                    circle.children.forEach(child => {
+                        this.addCircleToSVG(child);
+                    });
+                }
+                
+                this.splitCount++;
+                this.updateProgress();
+                
+                // 检查是否完成
+                if (this.splitCount === this.totalCircles - 1) {
+                    setTimeout(() => {
+                        alert('恭喜！你已经完全展示了图像！');
+                    }, 500);
+                }
+            }
+
+            updateProgress() {
+                // 计算已渲染的最小圆形数量（叶子节点）
+                let renderedLeafCount = 0;
+                const leafLevel = 0; // 最精细层级
+                
+                this.allCircles.forEach(circle => {
+                    if (circle.level === leafLevel && circle.rendered) {
+                        renderedLeafCount++;
+                    }
+                });
+                
+                const totalLeafCount = Math.pow(4, this.maxLayers - 1);
+                const progress = Math.round((renderedLeafCount / totalLeafCount) * 100);
+                
+                document.getElementById('progressText').textContent = progress + '%';
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('splitCount').textContent = renderedLeafCount;
+                document.getElementById('totalCount').textContent = totalLeafCount;
+                
+                // 检查完成状态
+                if (progress >= 100) {
+                    setTimeout(() => {
+                        alert('恭喜！你已经完全展示了图像！');
+                    }, 500);
+                }
+            }
+        }
+
+        class Circle {
+            constructor(x, y, size, color, children = null, level = 0) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.children = children;
+                this.level = level; // 添加层级信息
+                this.parent = null;
+                this.element = null;
+                this.rendered = false;
+            }
+
+            canSplit() {
+                return this.children && this.children.length > 0 && this.rendered && 
+                       !this.children.some(child => child.rendered);
+            }
+        }
+
+        // 全局函数
+        function loadDefaultImage() {
+            splitter.loadDefaultImage();
+        }
+
+        function resetVisualization() {
+            splitter.setupSVG();
+            splitter.render();
+        }
+
+        function updateLayers() {
+            const value = document.getElementById('layerSlider').value;
+            document.getElementById('maxLayers').textContent = value;
+            splitter.maxLayers = parseInt(value);
+            splitter.minSize = Math.max(2, 512 / Math.pow(2, splitter.maxLayers));
+            splitter.setupSVG();
+            splitter.loadDefaultImage();
+        }
+
+        // 初始化
+        let splitter;
+        window.addEventListener('load', () => {
+            splitter = new InteractiveImageSplitter();
+        });
+    </script>
+</body>
+</html>
