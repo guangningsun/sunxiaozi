@@ -174,10 +174,12 @@ export default hopeTheme({
     // Install @waline/client before enabling it
     // Note: This is for testing ONLY!
     // You MUST generate and use your own comment service in production.
-    // comment: {
-    //   provider: "Waline",
-    //   serverURL: "https://waline-comment.vuejs.press",
-    // },
+    // https://waline-comment.vuejs.press
+    comment: {
+      provider: "Waline",
+      serverURL: "https://2ttwd1dp.api.lncldglobal.com", // 这是一个演示服务器，建议替换为自己的服务器
+      pageview: true, // 启用访问量统计
+    },
 
     components: {
       components: ["Badge", "VPCard"],

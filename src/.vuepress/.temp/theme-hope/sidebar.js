@@ -1,1 +1,1 @@
-export const sidebarData = {"/posts/":["file-diff-tool","pdf-check","interval_training_tool","text_statistics_tool","stopwatch_timer","string_obfuscator","encryption-tool"],"/techo/":[],"/easylife/":[]};
+export const sidebarData = {"/posts/":["file-diff-tool","pdf-check","interval_training_tool","text_statistics_tool","string_obfuscator","stopwatch_timer","password_strength_analyzer","sound_decibel_meter","speed_test_tool","koalas_clone","encryption-tool"],"/techo/":[],"/easylife/":[]};

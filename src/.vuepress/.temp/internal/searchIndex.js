@@ -115,6 +115,151 @@ export const SEARCH_INDEX = [
     "extraFields": []
   },
   {
+    "title": "011.交互式图像分解工具",
+    "headers": [
+      {
+        "level": 2,
+        "title": "功能特点",
+        "slug": "功能特点",
+        "link": "#功能特点",
+        "children": [
+          {
+            "level": 3,
+            "title": "🎯 核心功能",
+            "slug": "🎯-核心功能",
+            "link": "#🎯-核心功能",
+            "children": []
+          },
+          {
+            "level": 3,
+            "title": "✨ 视觉效果",
+            "slug": "✨-视觉效果",
+            "link": "#✨-视觉效果",
+            "children": []
+          },
+          {
+            "level": 3,
+            "title": "🛠️ 技术特性",
+            "slug": "🛠️-技术特性",
+            "link": "#🛠️-技术特性",
+            "children": []
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "title": "使用说明",
+        "slug": "使用说明",
+        "link": "#使用说明",
+        "children": [
+          {
+            "level": 3,
+            "title": "基础操作",
+            "slug": "基础操作",
+            "link": "#基础操作",
+            "children": []
+          },
+          {
+            "level": 3,
+            "title": "高级技巧",
+            "slug": "高级技巧",
+            "link": "#高级技巧",
+            "children": []
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "title": "使用工具",
+        "slug": "使用工具",
+        "link": "#使用工具",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "备用访问方式",
+        "slug": "备用访问方式",
+        "link": "#备用访问方式",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "技术原理",
+        "slug": "技术原理",
+        "link": "#技术原理",
+        "children": [
+          {
+            "level": 3,
+            "title": "四叉树算法",
+            "slug": "四叉树算法",
+            "link": "#四叉树算法",
+            "children": []
+          },
+          {
+            "level": 3,
+            "title": "颜色平均算法",
+            "slug": "颜色平均算法",
+            "link": "#颜色平均算法",
+            "children": []
+          },
+          {
+            "level": 3,
+            "title": "交互检测",
+            "slug": "交互检测",
+            "link": "#交互检测",
+            "children": []
+          }
+        ]
+      }
+    ],
+    "path": "/posts/koalas_clone.html",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "008.密码强度分析器",
+    "headers": [
+      {
+        "level": 2,
+        "title": "功能特点",
+        "slug": "功能特点",
+        "link": "#功能特点",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "颜值即正义",
+        "slug": "颜值即正义",
+        "link": "#颜值即正义",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用说明",
+        "slug": "使用说明",
+        "link": "#使用说明",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用工具",
+        "slug": "使用工具",
+        "link": "#使用工具",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "备用访问方式",
+        "slug": "备用访问方式",
+        "link": "#备用访问方式",
+        "children": []
+      }
+    ],
+    "path": "/posts/password_strength_analyzer.html",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
     "title": "003.PDF签名检查工具",
     "headers": [
       {
@@ -147,6 +292,78 @@ export const SEARCH_INDEX = [
       }
     ],
     "path": "/posts/pdf-check.html",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "009.声音分贝检测工具",
+    "headers": [
+      {
+        "level": 2,
+        "title": "功能特点",
+        "slug": "功能特点",
+        "link": "#功能特点",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用说明",
+        "slug": "使用说明",
+        "link": "#使用说明",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用工具",
+        "slug": "使用工具",
+        "link": "#使用工具",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "备用访问方式",
+        "slug": "备用访问方式",
+        "link": "#备用访问方式",
+        "children": []
+      }
+    ],
+    "path": "/posts/sound_decibel_meter.html",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "010.网络测速工具",
+    "headers": [
+      {
+        "level": 2,
+        "title": "功能特点",
+        "slug": "功能特点",
+        "link": "#功能特点",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用说明",
+        "slug": "使用说明",
+        "link": "#使用说明",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "使用工具",
+        "slug": "使用工具",
+        "link": "#使用工具",
+        "children": []
+      },
+      {
+        "level": 2,
+        "title": "备用访问方式",
+        "slug": "备用访问方式",
+        "link": "#备用访问方式",
+        "children": []
+      }
+    ],
+    "path": "/posts/speed_test_tool.html",
     "pathLocale": "/",
     "extraFields": []
   },
@@ -336,9 +553,51 @@ export const SEARCH_INDEX = [
     "extraFields": []
   },
   {
+    "title": "标签: 图像处理",
+    "headers": [],
+    "path": "/tag/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "标签: 交互式可视化",
+    "headers": [],
+    "path": "/tag/%E4%BA%A4%E4%BA%92%E5%BC%8F%E5%8F%AF%E8%A7%86%E5%8C%96/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "标签: 创意工具",
+    "headers": [],
+    "path": "/tag/%E5%88%9B%E6%84%8F%E5%B7%A5%E5%85%B7/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "标签: 密码工具",
+    "headers": [],
+    "path": "/tag/%E5%AF%86%E7%A0%81%E5%B7%A5%E5%85%B7/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
     "title": "标签: PDF签名检查",
     "headers": [],
     "path": "/tag/pdf%E7%AD%BE%E5%90%8D%E6%A3%80%E6%9F%A5/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "标签: 声音分贝检测",
+    "headers": [],
+    "path": "/tag/%E5%A3%B0%E9%9F%B3%E5%88%86%E8%B4%9D%E6%A3%80%E6%B5%8B/",
+    "pathLocale": "/",
+    "extraFields": []
+  },
+  {
+    "title": "标签: 网络测速工具",
+    "headers": [],
+    "path": "/tag/%E7%BD%91%E7%BB%9C%E6%B5%8B%E9%80%9F%E5%B7%A5%E5%85%B7/",
     "pathLocale": "/",
     "extraFields": []
   },
@@ -388,49 +647,6 @@ export const SEARCH_INDEX = [
     "title": "时间轴",
     "headers": [],
     "path": "/timeline/",
-    "pathLocale": "/",
-    "extraFields": []
-  },
-  {
-    "title": "008.密码强度分析器",
-    "headers": [
-      {
-        "level": 2,
-        "title": "功能特点",
-        "slug": "功能特点",
-        "link": "#功能特点",
-        "children": []
-      },
-      {
-        "level": 2,
-        "title": "颜值即正义",
-        "slug": "颜值即正义",
-        "link": "#颜值即正义",
-        "children": []
-      },
-      {
-        "level": 2,
-        "title": "使用说明",
-        "slug": "使用说明",
-        "link": "#使用说明",
-        "children": []
-      },
-      {
-        "level": 2,
-        "title": "使用工具",
-        "slug": "使用工具",
-        "link": "#使用工具",
-        "children": []
-      },
-      {
-        "level": 2,
-        "title": "备用访问方式",
-        "slug": "备用访问方式",
-        "link": "#备用访问方式",
-        "children": []
-      }
-    ],
-    "path": "/posts/password_strength_analyzer.html",
     "pathLocale": "/",
     "extraFields": []
   }

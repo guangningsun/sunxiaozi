@@ -1,43 +1,49 @@
 {
-  "hash": "0bf9a93a",
-  "configHash": "1f02cb8d",
-  "lockfileHash": "77fddf94",
-  "browserHash": "709e0b00",
+  "hash": "f2a263bb",
+  "configHash": "5289cc36",
+  "lockfileHash": "94a5457a",
+  "browserHash": "d118db44",
   "optimized": {
-    "slimsearch": {
-      "src": "../../../../node_modules/slimsearch/dist/index.mjs",
-      "file": "slimsearch.js",
-      "fileHash": "00dcc739",
+    "@waline/client > autosize": {
+      "src": "../../../../node_modules/autosize/dist/autosize.esm.js",
+      "file": "@waline_client___autosize.js",
+      "fileHash": "1c430962",
       "needsInterop": false
+    },
+    "@waline/client > recaptcha-v3": {
+      "src": "../../../../node_modules/recaptcha-v3/dist/ReCaptcha.js",
+      "file": "@waline_client___recaptcha-v3.js",
+      "fileHash": "327c279c",
+      "needsInterop": true
     },
     "@vueuse/core": {
       "src": "../../../../node_modules/@vueuse/core/index.mjs",
       "file": "@vueuse_core.js",
-      "fileHash": "456ede46",
+      "fileHash": "faa83ad1",
       "needsInterop": false
     },
     "@vue/devtools-api": {
       "src": "../../../../node_modules/@vue/devtools-api/dist/index.js",
       "file": "@vue_devtools-api.js",
-      "fileHash": "c6d54993",
+      "fileHash": "e8b6a5ae",
       "needsInterop": false
     },
     "@vuepress/shared": {
       "src": "../../../../node_modules/@vuepress/shared/dist/index.js",
       "file": "@vuepress_shared.js",
-      "fileHash": "919c7847",
+      "fileHash": "34a5daf0",
       "needsInterop": false
     },
     "vue": {
       "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
       "file": "vue.js",
-      "fileHash": "782575f8",
+      "fileHash": "8259fa9e",
       "needsInterop": false
     },
     "vue-router": {
       "src": "../../../../node_modules/vue-router/dist/vue-router.esm-bundler.js",
       "file": "vue-router.js",
-      "fileHash": "60273b49",
+      "fileHash": "238e2f63",
       "needsInterop": false
     }
   },
@@ -45,8 +51,8 @@
     "chunk-HVR2FF6M": {
       "file": "chunk-HVR2FF6M.js"
     },
-    "chunk-V6TY7KAL": {
-      "file": "chunk-V6TY7KAL.js"
+    "chunk-BUSYA2B4": {
+      "file": "chunk-BUSYA2B4.js"
     }
   }
 }
