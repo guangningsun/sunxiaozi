@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS点击率测试 - 测试你的鼠标点击速度</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .time-selector {
+            margin-bottom: 30px;
+        }
+
+        .time-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .time-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .time-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-area {
+            margin: 30px 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            user-select: none;
+        }
+
+        .click-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .click-button:active {
+            transform: scale(0.95);
+        }
+
+        .click-button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .result-cps {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .result-details {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 2em;
+            }
+
+            .click-button {
+                width: 150px;
+                height: 150px;
+                font-size: 1.2em;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .time-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">CPS 点击率测试</h1>
+            <p class="subtitle">测试你的鼠标点击速度 - 每秒点击次数</p>
+        </div>
+
+        <div class="time-selector">
+            <div class="time-buttons">
+                <button class="time-btn" data-time="1">1秒</button>
+                <button class="time-btn" data-time="5">5秒</button>
+                <button class="time-btn active" data-time="10">10秒</button>
+                <button class="time-btn" data-time="30">30秒</button>
+            </div>
+        </div>
+
+        <div class="test-area">
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="clickCount">0</span>
+                    <span class="stat-label">点击次数</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="currentCPS">0.0</span>
+                    <span class="stat-label">当前CPS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="timeLeft">10</span>
+                    <span class="stat-label">剩余时间</span>
+                </div>
+            </div>
+
+            <button class="click-button" id="clickButton">
+                点击开始测试
+            </button>
+        </div>
+
+        <div class="result" id="result">
+            <div class="result-title">测试完成！</div>
+            <div class="result-cps" id="finalCPS">0.0</div>
+            <div class="result-details">
+                <span id="finalClicks">0</span> 次点击 / <span id="finalTime">10</span> 秒
+            </div>
+            <button class="reset-btn" onclick="resetTest()">重新测试</button>
+        </div>
+
+        <div class="instructions">
+            <strong>使用说明：</strong><br>
+            1. 选择测试时长（1秒、5秒、10秒或30秒）<br>
+            2. 点击圆形按钮开始测试<br>
+            3. 在规定时间内尽可能快地点击<br>
+            4. 查看你的CPS（每秒点击次数）结果
+        </div>
+    </div>
+
+    <script>
+        class CPSTest {
+            constructor() {
+                this.isRunning = false;
+                this.clickCount = 0;
+                this.testDuration = 10; // 默认10秒
+                this.timeLeft = this.testDuration;
+                this.startTime = 0;
+                this.timer = null;
+                this.updateTimer = null;
+                
+                this.initElements();
+                this.bindEvents();
+            }
+
+            initElements() {
+                this.clickButton = document.getElementById('clickButton');
+                this.clickCountEl = document.getElementById('clickCount');
+                this.currentCPSEl = document.getElementById('currentCPS');
+                this.timeLeftEl = document.getElementById('timeLeft');
+                this.resultEl = document.getElementById('result');
+                this.finalCPSEl = document.getElementById('finalCPS');
+                this.finalClicksEl = document.getElementById('finalClicks');
+                this.finalTimeEl = document.getElementById('finalTime');
+                this.timeButtons = document.querySelectorAll('.time-btn');
+            }
+
+            bindEvents() {
+                this.clickButton.addEventListener('click', () => this.handleClick());
+                
+                this.timeButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectTime(e));
+                });
+
+                // 防止右键菜单影响测试
+                this.clickButton.addEventListener('contextmenu', (e) => e.preventDefault());
+                
+                // 键盘空格键支持
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && this.isRunning) {
+                        e.preventDefault();
+                        this.handleClick();
+                    }
+                });
+            }
+
+            selectTime(e) {
+                if (this.isRunning) return;
+                
+                this.timeButtons.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                this.testDuration = parseInt(e.target.dataset.time);
+                this.timeLeft = this.testDuration;
+                this.timeLeftEl.textContent = this.timeLeft;
+                this.finalTimeEl.textContent = this.testDuration;
+            }
+
+            handleClick() {
+                if (!this.isRunning) {
+                    this.startTest();
+                } else {
+                    this.registerClick();
+                }
+            }
+
+            startTest() {
+                this.isRunning = true;
+                this.clickCount = 0;
+                this.timeLeft = this.testDuration;
+                this.startTime = Date.now();
+                
+                this.clickButton.textContent = '点击！';
+                this.resultEl.classList.remove('show');
+                
+                // 禁用时间选择按钮
+                this.timeButtons.forEach(btn => btn.disabled = true);
+                
+                // 开始倒计时
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.timeLeftEl.textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endTest();
+                    }
+                }, 1000);
+                
+                // 更新CPS显示
+                this.updateTimer = setInterval(() => {
+                    this.updateCurrentCPS();
+                }, 100);
+                
+                // 注册第一次点击
+                this.registerClick();
+            }
+
+            registerClick() {
+                if (!this.isRunning) return;
+                
+                this.clickCount++;
+                this.clickCountEl.textContent = this.clickCount;
+                
+                // 点击动画效果
+                this.clickButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.clickButton.style.transform = 'scale(1)';
+                }, 100);
+            }
+
+            updateCurrentCPS() {
+                const elapsed = (Date.now() - this.startTime) / 1000;
+                const currentCPS = elapsed > 0 ? (this.clickCount / elapsed).toFixed(1) : '0.0';
+                this.currentCPSEl.textContent = currentCPS;
+            }
+
+            endTest() {
+                this.isRunning = false;
+                
+                clearInterval(this.timer);
+                clearInterval(this.updateTimer);
+                
+                const actualDuration = (Date.now() - this.startTime) / 1000;
+                const finalCPS = (this.clickCount / actualDuration).toFixed(2);
+                
+                this.clickButton.textContent = '点击开始测试';
+                this.clickButton.disabled = false;
+                
+                // 启用时间选择按钮
+                this.timeButtons.forEach(btn => btn.disabled = false);
+                
+                // 显示结果
+                this.finalCPSEl.textContent = finalCPS;
+                this.finalClicksEl.textContent = this.clickCount;
+                this.resultEl.classList.add('show');
+                
+                // 保存到本地存储
+                this.saveResult(finalCPS, this.clickCount, this.testDuration);
+            }
+
+            saveResult(cps, clicks, duration) {
+                const results = JSON.parse(localStorage.getItem('cpsResults') || '[]');
+                results.push({
+                    cps: parseFloat(cps),
+                    clicks: clicks,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // 只保留最近20次结果
+                if (results.length > 20) {
+                    results.splice(0, results.length - 20);
+                }
+                
+                localStorage.setItem('cpsResults', JSON.stringify(results));
+            }
+
+            reset() {
+                if (this.isRunning) {
+                    clearInterval(this.timer);
+                    clearInterval(this.updateTimer);
+                    this.isRunning = false;
+                }
+                
+                this.clickCount = 0;
+                this.timeLeft = this.testDuration;
+                
+                this.clickCountEl.textContent = '0';
+                this.currentCPSEl.textContent = '0.0';
+                this.timeLeftEl.textContent = this.timeLeft;
+                this.clickButton.textContent = '点击开始测试';
+                this.clickButton.disabled = false;
+                
+                this.timeButtons.forEach(btn => btn.disabled = false);
+                this.resultEl.classList.remove('show');
+            }
+        }
+
+        // 全局函数
+        function resetTest() {
+            cpsTest.reset();
+        }
+
+        // 初始化应用
+        const cpsTest = new CPSTest();
+
+        // 页面加载完成后的提示
+        window.addEventListener('load', () => {
+            console.log('CPS测试已准备就绪！');
+        });
+    </script>
+</body>
+</html>
